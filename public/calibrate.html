@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beeps Visual Calibration Stage</title>
+  <style>
+    :root {
+      --void: #05080c;
+      --panel: #0b1118;
+      --panel-border: rgba(121, 215, 229, 0.22);
+      --accent: #79d7e5;
+      --text: #e6f0f5;
+      --muted: #8295a5;
+      --amber: #e2ad55;
+      --pink: #f180bd;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--void);
+      color: var(--text);
+      font-family: var(--font);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    header.hud-bar {
+      height: 44px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 0.8rem;
+      z-index: 100;
+    }
+    .hud-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+    }
+    .hud-title span {
+      background: var(--accent);
+      color: var(--void);
+      font-size: 0.62rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+    .hud-status {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+    .stage-viewport {
+      flex: 1;
+      background: #020407;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stage-canvas {
+      position: relative;
+      width: 100%;
+      max-width: 1160px;
+      aspect-ratio: 16 / 9;
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--panel-border);
+      overflow: hidden;
+      cursor: crosshair;
+      user-select: none;
+    }
+    .guideline-floor {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(121, 215, 229, 0.6);
+      box-shadow: 0 0 6px rgba(121, 215, 229, 0.8);
+      pointer-events: none;
+      z-index: 40;
+    }
+    .guideline-vertical {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: rgba(241, 128, 189, 0.5);
+      box-shadow: 0 0 6px rgba(241, 128, 189, 0.8);
+      pointer-events: none;
+      z-index: 40;
+    }
+    .station-marker {
+      position: absolute;
+      transform: translate(-50%, 50%);
+      padding: 2px 6px;
+      border: 1px dashed var(--amber);
+      background: rgba(226, 173, 85, 0.18);
+      color: var(--amber);
+      font-size: 0.62rem;
+      border-radius: 3px;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 30;
+    }
+    .actor-container {
+      position: absolute;
+      transform: translateX(-50%);
+      transform-origin: bottom center;
+      z-index: 50;
+      cursor: grab;
+      user-select: none;
+    }
+    .actor-container:active {
+      cursor: grabbing;
+    }
+    .actor-sprite {
+      display: block;
+      image-rendering: pixelated;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.6));
+    }
+    .pivot-dot {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff3366;
+      box-shadow: 0 0 8px #ff3366;
+      transform: translate(-50%, 50%);
+      pointer-events: none;
+      z-index: 60;
+    }
+    aside.control-panel {
+      width: 360px;
+      background: var(--panel);
+      border-left: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      font-size: 0.78rem;
+      overflow-y: auto;
+    }
+    .panel-section {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .section-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+    .btn-group-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    button.btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.72rem;
+      font-family: inherit;
+      transition: all 120ms ease;
+      text-align: center;
+    }
+    button.btn:hover {
+      background: rgba(121, 215, 229, 0.15);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    button.btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--void);
+      font-weight: 700;
+    }
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+    .field-row label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      flex: 1;
+    }
+    .field-row input[type="range"] {
+      flex: 2;
+      accent-color: var(--accent);
+    }
+    .field-row input[type="number"] {
+      width: 62px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+      padding: 3px 5px;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      text-align: right;
+    }
+    .nudge-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      max-width: 130px;
+      margin: 8px auto 8px;
+    }
+    .nudge-pad button {
+      padding: 6px;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .checkbox-row input {
+      accent-color: var(--accent);
+    }
+    .code-output {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 0.7rem;
+      color: #bbf;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-bottom: 6px;
+      user-select: all;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: var(--void);
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 6px 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 1000;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <header class="hud-bar">
+    <div class="hud-title">
+      <span>CALIBRATOR</span> BEEPS COCKPIT STAGE
+    </div>
+    <div class="hud-status">
+      <div><b>Arrows</b> to nudge &bull; <b>Shift</b>: fast &bull; <b>Click/Drag</b> on stage</div>
+    </div>
+  </header>
+
+  <main class="main-workspace">
+    <section class="stage-viewport">
+      <div id="stage" class="stage-canvas">
+        <div id="floor-line" class="guideline-floor"></div>
+        <div id="vertical-line" class="guideline-vertical"></div>
+        <div id="station-markers"></div>
+
+        <div id="actor" class="actor-container">
+          <img id="sprite" class="actor-sprite" alt="Beeps">
+          <div id="pivot" class="pivot-dot" title="Ground Contact Point"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="control-panel">
+      <div class="panel-section">
+        <div class="section-title">1. Room Plate</div>
+        <div class="btn-group" id="room-buttons">
+          <button class="btn active" data-room="bridge">Command Deck</button>
+          <button class="btn" data-room="bee-brain">Memory Core</button>
+          <button class="btn" data-room="creative-lab">Creative Lab</button>
+          <button class="btn" data-room="work">Operations Engine</button>
+          <button class="btn" data-room="school">Learning Observatory</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">2. Beeps Pose</div>
+        <div class="btn-group btn-group-3" id="pose-buttons"></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">3. Coordinate Calibration</div>
+        
+        <div class="field-row">
+          <label for="input-x">X (%)</label>
+          <input type="range" id="slider-x" min="0" max="100" step="0.1">
+          <input type="number" id="input-x" min="0" max="100" step="0.1">
+        </div>
+
+        <div class="field-row">
+          <label for="input-floor">Floor (%)</label>
+          <input type="range" id="slider-floor" min="0" max="100" step="0.1">
+          <input type="number" id="input-floor" min="0" max="100" step="0.1">
+        </div>
+
+        <div class="field-row">
+          <label for="input-scale">Scale</label>
+          <input type="range" id="slider-scale" min="0.4" max="2.5" step="0.05">
+          <input type="number" id="input-scale" min="0.4" max="2.5" step="0.05">
+        </div>
+
+        <div class="field-row">
+          <label for="input-ground">Ground Ratio</label>
+          <input type="range" id="slider-ground" min="-0.3" max="0.35" step="0.005">
+          <input type="number" id="input-ground" min="-0.3" max="0.35" step="0.005">
+        </div>
+
+        <div class="nudge-pad">
+          <div></div>
+          <button class="btn" id="nudge-up" title="Up (&uarr;)">▲</button>
+          <div></div>
+          <button class="btn" id="nudge-left" title="Left (&larr;)">◀</button>
+          <button class="btn" id="nudge-center" title="Reset Home">●</button>
+          <button class="btn" id="nudge-right" title="Right (&rarr;)">▶</button>
+          <div></div>
+          <button class="btn" id="nudge-down" title="Down (&darr;)">▼</button>
+          <div></div>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="check-flip"> Flip Horizontal
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" id="check-guidelines" checked> Show Guidelines & Contact Point
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" id="check-stations" checked> Show Station Anchors
+        </label>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">
+          4. Export Code
+          <button class="btn" id="copy-btn" style="padding: 2px 8px; font-size: 0.65rem;">Copy JS</button>
+        </div>
+        <div class="code-output" id="code-box"></div>
+      </div>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast">Copied to clipboard!</div>
+
+  <script>
+    const ROOMS = {
+      bridge: {
+        title: "Command Deck",
+        bg: "/assets/background-command-deck-b.png",
+        home: { x: 56, floor: 5 },
+        scale: 1.55,
+        stations: [
+          { id: "bridge-console", label: "Control panel", x: 26, floor: 41, walkX: 26, walkFloor: 5 }
+        ],
+        poses: [
+          { id: "idle-a", label: "Idle A", file: "/assets/beeps-idle-command-deck-a-v2.png", ground: 0.015 },
+          { id: "idle-b", label: "Idle B", file: "/assets/beeps-idle-command-deck-b-v2.png", ground: 0.015 },
+          { id: "console-work", label: "Console Work", file: "/assets/beeps-pose-command-deck-work-b-a-v1.png", ground: 0.048 },
+          { id: "console-stand", label: "Console Stand", file: "/assets/beeps-pose-console.png", ground: 0.048 },
+          { id: "coffee", label: "Tactical Coffee", file: "/assets/beeps-pose-coffee.png", ground: 0.03 },
+          { id: "walk-left", label: "Walk Left", file: "/assets/beeps-walk-left-a-v2.png", ground: 0.019 },
+          { id: "walk-right", label: "Walk Right", file: "/assets/beeps-walk-right-a-v2.png", ground: 0.019 }
+        ]
+      },
+      "bee-brain": {
+        title: "Memory Core",
+        bg: "/assets/background-memory-core-b.png",
+        home: { x: 55, floor: 5 },
+        scale: 1.55,
+        stations: [
+          { id: "memory-shelves", label: "Bookcase", x: 19, floor: 24, walkX: 18, walkFloor: 5 },
+          { id: "memory-terminal", label: "Archive terminal", x: 60, floor: 43, walkX: 23, walkFloor: 5 },
+          { id: "memory-window", label: "Memory window", x: 59, floor: 68, walkX: 57, walkFloor: 5 }
+        ],
+        poses: [
+          { id: "idle-a", label: "Idle A", file: "/assets/beeps-idle-memory-core-a-v2.png", ground: 0.029 },
+          { id: "archive-bplate", label: "Archive Search", file: "/assets/beeps-pose-memory-archive-bplate-a-v1.png", ground: 0.048 },
+          { id: "terminal-work", label: "Terminal Work", file: "/assets/beeps-pose-command-deck-work-b-a-v1.png", ground: 0.048 },
+          { id: "window-gaze", label: "Window Gaze", file: "/assets/beeps-pose-memory-window-bplate-a-v1.png", ground: 0.15 },
+          { id: "walk-left", label: "Walk Left", file: "/assets/beeps-walk-left-a-v2.png", ground: 0.019 },
+          { id: "walk-right", label: "Walk Right", file: "/assets/beeps-walk-right-a-v2.png", ground: 0.019 }
+        ]
+      },
+      "creative-lab": {
+        title: "Creative Lab",
+        bg: "/assets/background-creative-lab-b.png",
+        home: { x: 44, floor: 5 },
+        scale: 1.55,
+        stations: [
+          { id: "creative-notes", label: "Workbench notes", x: 26, floor: 39, walkX: 27, walkFloor: 5 },
+          { id: "creative-beanbag", label: "Bean bag", x: 77, floor: 5, walkX: 77, walkFloor: 5 },
+          { id: "creative-game", label: "Game Boy", x: 77, floor: 17, walkX: 77, walkFloor: 5 }
+        ],
+        poses: [
+          { id: "idle-a", label: "Idle A", file: "/assets/beeps-idle-creative-lab-a-v2.png", ground: 0.029 },
+          { id: "reading", label: "Reading Notes", file: "/assets/beeps-pose-reading.png", ground: 0.068 },
+          { id: "beanbag-idle", label: "Beanbag Rest", file: "/assets/beeps-pose-beanbag-idle-a-v2.png", ground: 0.025 },
+          { id: "beanbag-play", label: "Beanbag Game", file: "/assets/beeps-pose-beanbag-play-v2.png", ground: 0.025 },
+          { id: "workbench", label: "Workbench", file: "/assets/beeps-pose-workbench.png", ground: 0.29 },
+          { id: "walk-left", label: "Walk Left", file: "/assets/beeps-walk-left-a-v2.png", ground: 0.019 },
+          { id: "walk-right", label: "Walk Right", file: "/assets/beeps-walk-right-a-v2.png", ground: 0.019 }
+        ]
+      },
+      work: {
+        title: "Operations Engine",
+        bg: "/assets/background-operations-engine-b.png",
+        home: { x: 55, floor: 5 },
+        scale: 1.55,
+        stations: [
+          { id: "operations-console", label: "Desk panels", x: 22, floor: 36, walkX: 24, walkFloor: 5 },
+          { id: "operations-hatch", label: "Maintenance hatch", x: 60, floor: 43, walkX: 60, walkFloor: 24 }
+        ],
+        poses: [
+          { id: "idle-a", label: "Idle A", file: "/assets/beeps-idle-operations-engine-a-v2.png", ground: 0.025 },
+          { id: "desk-panel", label: "Desk Work", file: "/assets/beeps-pose-command-deck-work-b-a-v1.png", ground: 0.048 },
+          { id: "hatch-repair", label: "Hatch Repair", file: "/assets/beeps-pose-operations-hatch-bplate-a-v2.png", ground: 0.12 },
+          { id: "seated", label: "Seated Serious", file: "/assets/beeps-pose-seated.png", ground: 0.051 },
+          { id: "walk-left", label: "Walk Left", file: "/assets/beeps-walk-left-a-v2.png", ground: 0.019 },
+          { id: "walk-right", label: "Walk Right", file: "/assets/beeps-walk-right-a-v2.png", ground: 0.019 }
+        ]
+      },
+      school: {
+        title: "Learning Observatory",
+        bg: "/assets/background-learning-observatory-b.png",
+        home: { x: 51, floor: 5 },
+        scale: 1.55,
+        stations: [
+          { id: "school-desk", label: "Study desk", x: 22, floor: 30, walkX: 31, walkFloor: 5 },
+          { id: "school-chair", label: "Observatory chair", x: 45, floor: 6, walkX: 45, walkFloor: 5 },
+          { id: "school-telescope", label: "Observation telescope", x: 45, floor: 22, walkX: 45, walkFloor: 24 }
+        ],
+        poses: [
+          { id: "idle-a", label: "Idle A", file: "/assets/beeps-idle-learning-observatory-a-v2.png", ground: 0.029 },
+          { id: "study-desk", label: "Study Desk", file: "/assets/beeps-pose-command-deck-work-b-a-v1.png", ground: 0.048 },
+          { id: "comfy-chair", label: "Comfy Chair", file: "/assets/beeps-pose-observatory-chair-bplate-a-v2.png", ground: 0.12 },
+          { id: "telescope", label: "Telescope Look", file: "/assets/beeps-pose-observatory-telescope-bplate-a-v2.png", ground: -0.2 },
+          { id: "walk-left", label: "Walk Left", file: "/assets/beeps-walk-left-a-v2.png", ground: 0.019 },
+          { id: "walk-right", label: "Walk Right", file: "/assets/beeps-walk-right-a-v2.png", ground: 0.019 }
+        ]
+      }
+    };
+
+    let currentRoomKey = "bridge";
+    let currentPose = ROOMS.bridge.poses[0];
+    let state = {
+      x: ROOMS.bridge.home.x,
+      floor: ROOMS.bridge.home.floor,
+      scale: ROOMS.bridge.scale,
+      groundRatio: currentPose.ground,
+      flip: false,
+      showGuidelines: true,
+      showStations: true
+    };
+
+    const stage = document.getElementById("stage");
+    const actor = document.getElementById("actor");
+    const sprite = document.getElementById("sprite");
+    const floorLine = document.getElementById("floor-line");
+    const verticalLine = document.getElementById("vertical-line");
+    const stationMarkers = document.getElementById("station-markers");
+    const poseButtonsContainer = document.getElementById("pose-buttons");
+    const codeBox = document.getElementById("code-box");
+    const toast = document.getElementById("toast");
+
+    const sliderX = document.getElementById("slider-x");
+    const inputX = document.getElementById("input-x");
+    const sliderFloor = document.getElementById("slider-floor");
+    const inputFloor = document.getElementById("input-floor");
+    const sliderScale = document.getElementById("slider-scale");
+    const inputScale = document.getElementById("input-scale");
+    const sliderGround = document.getElementById("slider-ground");
+    const inputGround = document.getElementById("input-ground");
+    const checkFlip = document.getElementById("check-flip");
+    const checkGuidelines = document.getElementById("check-guidelines");
+    const checkStations = document.getElementById("check-stations");
+
+    function renderStage() {
+      const room = ROOMS[currentRoomKey];
+      stage.style.backgroundImage = `url("${room.bg}")`;
+
+      actor.style.left = `${state.x}%`;
+      actor.style.bottom = `${state.floor}%`;
+      actor.style.transform = `translateX(-50%) scale(${state.scale}) ${state.flip ? "scaleX(-1)" : ""}`;
+      sprite.src = currentPose.file;
+      sprite.style.transform = `translateY(${state.groundRatio * 100}%)`;
+
+      floorLine.style.bottom = `${state.floor}%`;
+      floorLine.style.display = state.showGuidelines ? "block" : "none";
+      verticalLine.style.left = `${state.x}%`;
+      verticalLine.style.display = state.showGuidelines ? "block" : "none";
+      document.getElementById("pivot").style.display = state.showGuidelines ? "block" : "none";
+
+      stationMarkers.innerHTML = "";
+      if (state.showStations) {
+        room.stations.forEach((st) => {
+          const m = document.createElement("div");
+          m.className = "station-marker";
+          m.style.left = `${st.x}%`;
+          m.style.bottom = `${st.floor}%`;
+          m.textContent = `★ ${st.label} (${st.x}%, ${st.floor}%)`;
+          stationMarkers.appendChild(m);
+        });
+      }
+
+      sliderX.value = state.x;
+      inputX.value = state.x;
+      sliderFloor.value = state.floor;
+      inputFloor.value = state.floor;
+      sliderScale.value = state.scale;
+      inputScale.value = state.scale;
+      sliderGround.value = state.groundRatio;
+      inputGround.value = state.groundRatio;
+      checkFlip.checked = state.flip;
+
+      codeBox.textContent = `// ${room.title} - ${currentPose.label}
+x: ${Number(state.x).toFixed(1)},
+floor: ${Number(state.floor).toFixed(1)},
+scale: ${Number(state.scale).toFixed(2)},
+groundRatio: ${Number(state.groundRatio).toFixed(3)}`;
+    }
+
+    function setRoom(roomKey) {
+      currentRoomKey = roomKey;
+      const room = ROOMS[roomKey];
+      state.x = room.home.x;
+      state.floor = room.home.floor;
+      state.scale = room.scale;
+      currentPose = room.poses[0];
+      state.groundRatio = currentPose.ground;
+
+      document.querySelectorAll("#room-buttons button").forEach((b) => {
+        b.classList.toggle("active", b.dataset.room === roomKey);
+      });
+
+      renderPoseButtons();
+      renderStage();
+    }
+
+    function renderPoseButtons() {
+      const room = ROOMS[currentRoomKey];
+      poseButtonsContainer.innerHTML = "";
+      room.poses.forEach((p) => {
+        const btn = document.createElement("button");
+        btn.className = `btn ${p.id === currentPose.id ? "active" : ""}`;
+        btn.textContent = p.label;
+        btn.addEventListener("click", () => {
+          currentPose = p;
+          state.groundRatio = p.ground;
+          document.querySelectorAll("#pose-buttons button").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderStage();
+        });
+        poseButtonsContainer.appendChild(btn);
+      });
+    }
+
+    sliderX.addEventListener("input", (e) => { state.x = parseFloat(e.target.value); renderStage(); });
+    inputX.addEventListener("change", (e) => { state.x = parseFloat(e.target.value); renderStage(); });
+    sliderFloor.addEventListener("input", (e) => { state.floor = parseFloat(e.target.value); renderStage(); });
+    inputFloor.addEventListener("change", (e) => { state.floor = parseFloat(e.target.value); renderStage(); });
+    sliderScale.addEventListener("input", (e) => { state.scale = parseFloat(e.target.value); renderStage(); });
+    inputScale.addEventListener("change", (e) => { state.scale = parseFloat(e.target.value); renderStage(); });
+    sliderGround.addEventListener("input", (e) => { state.groundRatio = parseFloat(e.target.value); renderStage(); });
+    inputGround.addEventListener("change", (e) => { state.groundRatio = parseFloat(e.target.value); renderStage(); });
+    checkFlip.addEventListener("change", (e) => { state.flip = e.target.checked; renderStage(); });
+    checkGuidelines.addEventListener("change", (e) => { state.showGuidelines = e.target.checked; renderStage(); });
+    checkStations.addEventListener("change", (e) => { state.showStations = e.target.checked; renderStage(); });
+
+    stage.addEventListener("click", (e) => {
+      const rect = stage.getBoundingClientRect();
+      const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+      const yPercent = (1 - (e.clientY - rect.top) / rect.height) * 100;
+      state.x = Math.round(xPercent * 10) / 10;
+      state.floor = Math.round(yPercent * 10) / 10;
+      renderStage();
+    });
+
+    let isDragging = false;
+    actor.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      e.stopPropagation();
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      const rect = stage.getBoundingClientRect();
+      const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+      const yPercent = (1 - (e.clientY - rect.top) / rect.height) * 100;
+      state.x = Math.max(0, Math.min(100, Math.round(xPercent * 10) / 10));
+      state.floor = Math.max(0, Math.min(100, Math.round(yPercent * 10) / 10));
+      renderStage();
+    });
+    window.addEventListener("mouseup", () => { isDragging = false; });
+
+    window.addEventListener("keydown", (e) => {
+      if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+      const step = e.shiftKey ? 2.0 : (e.altKey ? 0.1 : 0.5);
+      if (e.key === "ArrowLeft") { state.x = Math.max(0, state.x - step); e.preventDefault(); renderStage(); }
+      if (e.key === "ArrowRight") { state.x = Math.min(100, state.x + step); e.preventDefault(); renderStage(); }
+      if (e.key === "ArrowUp") { state.floor = Math.min(100, state.floor + step); e.preventDefault(); renderStage(); }
+      if (e.key === "ArrowDown") { state.floor = Math.max(0, state.floor - step); e.preventDefault(); renderStage(); }
+    });
+
+    document.getElementById("nudge-up").addEventListener("click", () => { state.floor += 0.5; renderStage(); });
+    document.getElementById("nudge-down").addEventListener("click", () => { state.floor -= 0.5; renderStage(); });
+    document.getElementById("nudge-left").addEventListener("click", () => { state.x -= 0.5; renderStage(); });
+    document.getElementById("nudge-right").addEventListener("click", () => { state.x += 0.5; renderStage(); });
+    document.getElementById("nudge-center").addEventListener("click", () => {
+      state.x = ROOMS[currentRoomKey].home.x;
+      state.floor = ROOMS[currentRoomKey].home.floor;
+      renderStage();
+    });
+
+    document.querySelectorAll("#room-buttons button").forEach((b) => {
+      b.addEventListener("click", () => setRoom(b.dataset.room));
+    });
+
+    document.getElementById("copy-btn").addEventListener("click", () => {
+      navigator.clipboard.writeText(codeBox.textContent).then(() => {
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 1600);
+      });
+    });
+
+    setRoom("bridge");
+  </script>
+</body>
+</html>

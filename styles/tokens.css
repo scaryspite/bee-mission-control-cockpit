@@ -1,0 +1,21 @@
+:root {
+  --void: #07090d;
+  --ship-black: #0c1118;
+  --panel: #111821;
+  --panel-soft: #1b2530;
+  --panel-border: #3c5660;
+  --text: #f4e7c7;
+  --text-dim: #a8a8a1;
+  --amber: #e2ad55;
+  --warning-red: #c75b58;
+  --screen-green: #9bc88c;
+  --moon-blue: #79d7e5;
+  --soft-pink: #f180bd;
+  --early-purple: #b28ae8;
+  --teal: #4fb3b8;
+  --dust: #5d5d55;
+  --shadow: rgba(0, 0, 0, 0.58);
+
+  --font-display: "SFNS Mono", "SF Mono", Menlo, Monaco, ui-monospace, monospace;
+  --font-body: "Avenir Next", "Helvetica Neue", Helvetica, system-ui, sans-serif;
+}

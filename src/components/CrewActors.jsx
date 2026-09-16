@@ -1,0 +1,273 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import "./CrewActors.css";
+import beepsSDK from "../sdk/BeepsSDK";
+
+// Custom hook for managing frame-by-frame animation loops with dynamic delays
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      const id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
+
+import { CREW_CONFIG } from "../data/crewConfig";
+
+function CrewMember({ config, isWorking }) {
+  const [x, setX] = useState(config.initialX);
+  const [facing, setFacing] = useState(config.initialFacing);
+  const [mode, setMode] = useState("idle"); // "idle" | "walk" | "cheer"
+  const [walkDuration, setWalkDuration] = useState(1400);
+  const [bubbleText, setBubbleText] = useState("");
+  const wanderTimer = useRef(null);
+  const walkTimer = useRef(null);
+  const bubbleTimer = useRef(null);
+  const workTimer = useRef(null);
+
+  const [frame, setFrame] = useState(0);
+
+  // Set work mode based on telemetry prop
+  useEffect(() => {
+    if (isWorking) {
+      // Interrupt any current action
+      window.clearTimeout(wanderTimer.current);
+      window.clearTimeout(walkTimer.current);
+      window.clearTimeout(bubbleTimer.current);
+      setBubbleText("");
+      setMode("work");
+    } else {
+      // If we were working, revert to idle
+      if (mode === "work") {
+        setMode("idle");
+      }
+    }
+  }, [isWorking, mode]);
+
+  // Animation loop
+  useInterval(() => {
+    let currentAnimation;
+    if (mode === "walk") {
+      currentAnimation = facing === "left" ? config.frames.walkL : config.frames.walkR;
+    } else {
+      currentAnimation = config.frames[mode] || config.frames.idle;
+    }
+    
+    if (Array.isArray(currentAnimation)) {
+      setFrame((prevFrame) => (prevFrame + 1) % currentAnimation.length);
+    }
+  }, 150);
+
+
+  // Autonomous wandering patrol cycle within dedicated bounds
+  useEffect(() => {
+    window.clearTimeout(wanderTimer.current);
+
+    if (mode === "cheer") return undefined;
+
+    const delay = 4200 + Math.floor(Math.random() * 4500);
+
+    wanderTimer.current = window.setTimeout(() => {
+      // 75% chance to roam, 25% chance to pause/idle
+      if (Math.random() < 0.75) {
+        const { min, max } = config.bounds;
+        const currentX = x;
+        const direction = Math.random() > 0.5 ? 1 : -1;
+        const delta = 4 + Math.random() * 8;
+        let nextX = currentX + direction * delta;
+
+        // Bounce back if out of bounds
+        if (nextX < min) nextX = min + Math.random() * 3;
+        if (nextX > max) nextX = max - Math.random() * 3;
+
+        const distance = Math.abs(nextX - currentX);
+        if (distance > 1.5) {
+          const duration = Math.min(2200, Math.max(1000, Math.round(distance * 140)));
+          const nextFacing = nextX < currentX ? "left" : "right";
+
+          setFacing(nextFacing);
+          setMode("walk");
+          setWalkDuration(duration);
+          setX(nextX);
+
+          walkTimer.current = window.setTimeout(() => {
+            setMode("idle");
+          }, duration);
+        }
+      }
+    }, delay);
+
+    return () => {
+      window.clearTimeout(wanderTimer.current);
+    };
+  }, [config.bounds, mode, x]);
+
+  // Click handler: trigger cheer and pop a lively speech bubble
+  const handleClick = useCallback(() => {
+    window.clearTimeout(walkTimer.current);
+    window.clearTimeout(wanderTimer.current);
+    window.clearTimeout(bubbleTimer.current);
+    window.clearTimeout(workTimer.current);
+
+    setMode("cheer");
+
+    // Select random dialogue line
+    const line = config.dialogues[Math.floor(Math.random() * config.dialogues.length)];
+    setBubbleText(line);
+
+    // Auto-dismiss bubble and reset to idle
+    bubbleTimer.current = window.setTimeout(() => {
+      setBubbleText("");
+    }, 4500);
+
+    window.setTimeout(() => {
+      setMode("idle");
+    }, 2800);
+  }, [config.dialogues]);
+
+
+
+  // MOCK TELEMETRY: In a real app, this would be a WebSocket or SSE listener
+  useEffect(() => {
+    const handleStatusDispatch = (payload) => {
+      const { crew_member, task } = payload;
+      if (crew_member in crewStatus) {
+        setCrewStatus(prev => ({ ...prev, [crew_member]: task === 'start' }));
+      }
+    };
+
+    const unsubscribe = beepsSDK.observe('crew-dispatch', handleStatusDispatch);
+
+    // Example of dispatching Alloy after 3s with a clear task detail
+    setTimeout(() => {
+      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'start', task_detail: 'Running deep-space diagnostic scan.' });
+    }, 3000);
+    
+    // Example of stopping Alloy after 8s with a completion message
+    setTimeout(() => {
+      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'stop', task_detail: 'Diagnostic scan complete. All systems nominal.' });
+    }, 8000);
+
+    return unsubscribe;
+  }, [crewStatus, setCrewStatus]);
+
+  // Determine current active sprite frame
+  let currentSprite = config.frames.idle[0]; // Default to first frame
+  let activeAnimationConfig;
+  
+  if (mode === "walk") {
+    activeAnimationConfig = facing === "left" ? config.frames.walkL : config.frames.walkR;
+  } else {
+    activeAnimationConfig = config.frames[mode] || config.frames.idle;
+  }
+
+  if (Array.isArray(activeAnimationConfig)) {
+    currentSprite = activeAnimationConfig[frame % activeAnimationConfig.length];
+  } else if (activeAnimationConfig) {
+    currentSprite = activeAnimationConfig;
+  }
+
+  const actorStyle = {
+    "--crew-accent": config.accent,
+    "--crew-glow": config.glow,
+    "--walk-duration": `${walkDuration}ms`,
+    left: `${x}%`,
+    [config.yAnchor]: config.yOffset,
+  };
+
+  return (
+    <div
+      className={`crew-actor-unit crew-actor-unit--${config.id}`}
+      style={actorStyle}
+      data-mode={mode}
+      data-facing={facing}
+    >
+      {/* Speech Bubble */}
+      {bubbleText && (
+        <div className="crew-speech-bubble" role="status" aria-live="polite">
+          <div className="crew-speech-badge">
+            <span className="crew-speech-name">{config.name}</span>
+            <span className="crew-speech-role">{config.role}</span>
+          </div>
+          <p className="crew-speech-text">{bubbleText}</p>
+          <div className="crew-speech-caret" aria-hidden="true" />
+        </div>
+      )}
+
+      {/* Interactive Actor Button */}
+      <button
+        type="button"
+        className="crew-actor-btn"
+        onClick={handleClick}
+        title={`${config.name} // ${config.title} (Click to interact)`}
+        aria-label={`${config.name} ${config.role} actor`}
+      >
+        <div className="crew-actor-halo" aria-hidden="true" />
+        <img
+          src={currentSprite}
+          alt={config.name}
+          className={`crew-actor-sprite crew-actor-sprite--${config.id}`}
+          draggable="false"
+        />
+        <div className="crew-actor-badge">
+          <span className="crew-badge-name">{config.name}</span>
+          <span className="crew-badge-role">{config.role}</span>
+        </div>
+      </button>
+    </div>
+  );
+}
+
+export default function CrewActors() {
+  const [crewStatus, setCrewStatus] = useState({
+    alloy: false,
+    nebs: false,
+    doublestuff: false,
+    rivet: false,
+    beeps: false,
+  });
+
+  // MOCK TELEMETRY: In a real app, this would be a WebSocket or SSE listener
+  useEffect(() => {
+    const handleStatusDispatch = (payload) => {
+      const { crew_member, task } = payload;
+      if (crew_member in crewStatus) {
+        setCrewStatus(prev => ({ ...prev, [crew_member]: task === 'start' }));
+      }
+    };
+
+    const unsubscribe = beepsSDK.observe('crew-dispatch', handleStatusDispatch);
+
+    // Example of dispatching Alloy after 3s with a clear task detail
+    setTimeout(() => {
+      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'start', task_detail: 'Running deep-space diagnostic scan.' });
+    }, 3000);
+    
+    // Example of stopping Alloy after 8s with a completion message
+    setTimeout(() => {
+      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'stop', task_detail: 'Diagnostic scan complete. All systems nominal.' });
+    }, 8000);
+
+    return unsubscribe;
+  }, []);
+
+  return (
+    <div className="crew-actors-layer" aria-label="Active Crew Stations">
+      <CrewMember config={CREW_CONFIG.alloy} isWorking={crewStatus.alloy} />
+      <CrewMember config={CREW_CONFIG.nebs} isWorking={crewStatus.nebs} />
+      <CrewMember config={CREW_CONFIG.doublestuff} isWorking={crewStatus.doublestuff} />
+      <CrewMember config={CREW_CONFIG.rivet} isWorking={crewStatus.rivet} />
+      <CrewMember config={CREW_CONFIG.beeps} isWorking={crewStatus.beeps} />
+    </div>
+  );
+}

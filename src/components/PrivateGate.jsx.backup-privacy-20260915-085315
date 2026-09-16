@@ -1,0 +1,385 @@
+import { useEffect, useState } from "react";
+
+const SESSION_KEY = "bmc-private-bridge";
+const SUPPORT_EMAIL = "packets@beemissioncontrol.com";
+
+async function sha256(value) {
+  const data = new TextEncoder().encode(value);
+  const digest = await window.crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function PublicShell({ children }) {
+  return (
+    <main className="public-site">
+      <header className="public-site-header">
+        <a className="public-site-brand" href="/">
+          Bee Mission Control
+        </a>
+
+        <nav aria-label="Public navigation">
+          <a href="/">Home</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a className="public-site-app-link" href="/app">
+            Private Application
+          </a>
+        </nav>
+      </header>
+
+      {children}
+
+      <footer className="public-site-footer">
+        <span>Bee Mission Control</span>
+        <span>Personal productivity and organization software</span>
+        <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+      </footer>
+    </main>
+  );
+}
+
+function PublicHome() {
+  useEffect(() => {
+    document.title = "Bee Mission Control";
+  }, []);
+
+  return (
+    <PublicShell>
+      <section className="public-hero">
+        <p className="public-eyebrow">Personal command center</p>
+
+        <h1>Bee Mission Control</h1>
+
+        <p className="public-lede">
+          Bee Mission Control is a personal productivity and organization
+          application that brings schedules, tasks, reminders, files, and
+          connected services into one workspace.
+        </p>
+
+        <p className="public-copy">
+          It helps its user review upcoming commitments, locate relevant
+          information, organize day-to-day work, and coordinate personal
+          workflows from a single interface.
+        </p>
+
+        <div className="public-actions">
+          <a className="public-button public-button-primary" href="/app">
+            Open private application
+          </a>
+
+          <a className="public-button" href="/privacy">
+            Privacy policy
+          </a>
+        </div>
+      </section>
+
+      <section className="public-panel">
+        <p className="public-eyebrow">Features</p>
+        <h2>What Bee Mission Control does</h2>
+
+        <div className="public-grid">
+          <article>
+            <h3>Schedule</h3>
+            <p>
+              Organizes calendar information, sessions, appointments, and
+              upcoming commitments.
+            </p>
+          </article>
+
+          <article>
+            <h3>Tasks &amp; reminders</h3>
+            <p>
+              Supports tasks, reminders, maintenance work, and recurring
+              personal workflows.
+            </p>
+          </article>
+
+          <article>
+            <h3>Files &amp; information</h3>
+            <p>
+              Helps locate and organize relevant documents and information
+              from connected sources.
+            </p>
+          </article>
+
+          <article>
+            <h3>Google integrations</h3>
+            <p>
+              When authorized, Bee Mission Control can use connected Google
+              services such as Calendar and Gmail to provide requested
+              scheduling and work-intake features.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section className="public-panel">
+        <p className="public-eyebrow">Google account access</p>
+        <h2>User-controlled connections</h2>
+
+        <p>
+          Bee Mission Control accesses Google account information only after
+          the user explicitly authorizes the connection through Google OAuth.
+        </p>
+
+        <p>
+          Google user data is used to provide features requested by the user.
+          Details are available in the{" "}
+          <a href="/privacy">Bee Mission Control Privacy Policy</a>.
+        </p>
+      </section>
+    </PublicShell>
+  );
+}
+
+function PrivacyPolicy() {
+  useEffect(() => {
+    document.title = "Privacy Policy | Bee Mission Control";
+  }, []);
+
+  return (
+    <PublicShell>
+      <article className="public-document">
+        <p className="public-eyebrow">Privacy</p>
+        <h1>Bee Mission Control Privacy Policy</h1>
+        <p className="public-updated">Last updated: September 15, 2026</p>
+
+        <h2>About Bee Mission Control</h2>
+        <p>
+          Bee Mission Control is a personal productivity and organization
+          application.
+        </p>
+
+        <h2>Google user data</h2>
+        <p>
+          Bee Mission Control may access Google account information only after
+          the user authorizes access through Google OAuth.
+        </p>
+
+        <p>
+          Depending on the features enabled by the user, this can include
+          Google Calendar information used to prepare schedules and Gmail
+          information used to surface relevant work-intake information.
+        </p>
+
+        <h2>How Google user data is used</h2>
+        <p>
+          Google user data is used only to provide functionality requested by
+          the user, including scheduling, organization, and work-intake
+          features.
+        </p>
+
+        <p>
+          Bee Mission Control does not sell Google user data or use Google
+          user data for advertising.
+        </p>
+
+        <h2>Data handling</h2>
+        <p>
+          Connected-service information is processed only as needed to provide
+          Bee Mission Control features. The application is designed to keep
+          source information within its originating service when practical
+          rather than creating unnecessary copies.
+        </p>
+
+        <h2>Access and revocation</h2>
+        <p>
+          Google account access is controlled by the user. A user can revoke
+          Bee Mission Control access at any time through their Google Account
+          security settings.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+          Privacy questions can be sent to{" "}
+          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
+        </p>
+      </article>
+    </PublicShell>
+  );
+}
+
+function TermsOfService() {
+  useEffect(() => {
+    document.title = "Terms of Service | Bee Mission Control";
+  }, []);
+
+  return (
+    <PublicShell>
+      <article className="public-document">
+        <p className="public-eyebrow">Terms</p>
+        <h1>Bee Mission Control Terms of Service</h1>
+        <p className="public-updated">Last updated: September 15, 2026</p>
+
+        <h2>Service</h2>
+        <p>
+          Bee Mission Control is personal productivity and organization
+          software provided for the authorized user's use.
+        </p>
+
+        <h2>Connected services</h2>
+        <p>
+          Some features depend on third-party services, including Google
+          services. Access to those services requires authorization from the
+          relevant account holder.
+        </p>
+
+        <h2>User responsibility</h2>
+        <p>
+          The user is responsible for reviewing application output before
+          relying on it for important scheduling, documentation, or other
+          decisions.
+        </p>
+
+        <h2>Availability</h2>
+        <p>
+          Features may change or become temporarily unavailable because of
+          maintenance, local system conditions, or third-party service
+          availability.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+          Questions can be sent to{" "}
+          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
+        </p>
+      </article>
+    </PublicShell>
+  );
+}
+
+function PrivateGate({ children }) {
+  const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+  const isPrivateApp = pathname === "/app";
+
+  const [unlocked, setUnlocked] = useState(
+    () =>
+      isPrivateApp &&
+      !import.meta.env.PROD &&
+      window.sessionStorage.getItem(SESSION_KEY) === "unlocked",
+  );
+
+  const [checkingServerAccess, setCheckingServerAccess] = useState(
+    isPrivateApp && import.meta.env.PROD,
+  );
+
+  const [phrase, setPhrase] = useState("");
+  const [message, setMessage] = useState("");
+  const configuredHash = import.meta.env.VITE_BMC_ACCESS_HASH?.trim().toLowerCase();
+
+  useEffect(() => {
+    if (!isPrivateApp || !import.meta.env.PROD) return undefined;
+
+    fetch("/__auth", { credentials: "include" })
+      .then((response) => {
+        if (response.ok) setUnlocked(true);
+      })
+      .finally(() => setCheckingServerAccess(false));
+
+    return undefined;
+  }, [isPrivateApp]);
+
+  if (pathname === "/") return <PublicHome />;
+  if (pathname === "/privacy") return <PrivacyPolicy />;
+  if (pathname === "/terms") return <TermsOfService />;
+
+  if (!isPrivateApp) {
+    window.location.replace("/");
+    return null;
+  }
+
+  const openSession = () => {
+    window.sessionStorage.setItem(SESSION_KEY, "unlocked");
+    setUnlocked(true);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (import.meta.env.PROD) {
+      const response = await fetch("/__auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ passphrase: phrase.trim() }),
+      });
+
+      if (response.ok) {
+        window.location.reload();
+        return;
+      }
+
+      setMessage("That key did not open the bridge.");
+      setPhrase("");
+      return;
+    }
+
+    if (!configuredHash) {
+      setMessage("Access key is not provisioned for this deployment.");
+      return;
+    }
+
+    const candidateHash = await sha256(phrase.trim());
+
+    if (candidateHash === configuredHash) {
+      openSession();
+      return;
+    }
+
+    setMessage("That key did not open the bridge.");
+    setPhrase("");
+  };
+
+  if (unlocked) return children;
+  if (checkingServerAccess) return null;
+
+  return (
+    <main className="private-gate">
+      <div className="private-gate-corner">BMC-01 // PRIVATE NETWORK</div>
+
+      <section className="private-gate-content" aria-labelledby="private-gate-title">
+        <p className="private-gate-kicker">Encrypted bridge access</p>
+        <h1 id="private-gate-title">Bee Mission Control</h1>
+
+        <p className="private-gate-copy">
+          A private command room for one captain. The bridge stays sealed until
+          its access key is verified.
+        </p>
+
+        <form className="private-gate-form" onSubmit={handleSubmit}>
+          <label htmlFor="bridge-key">Access key</label>
+
+          <input
+            id="bridge-key"
+            type="password"
+            value={phrase}
+            onChange={(event) => setPhrase(event.target.value)}
+            placeholder="enter private key"
+            autoComplete="current-password"
+          />
+
+          <button type="submit">Unlock bridge</button>
+        </form>
+
+        {import.meta.env.DEV && (
+          <button className="private-gate-local" type="button" onClick={openSession}>
+            Open local preview
+          </button>
+        )}
+
+        <p className="private-gate-message" role="alert" aria-live="polite">
+          {message || "Passphrase verification uses the browser's Web Crypto channel."}
+        </p>
+      </section>
+
+      <footer className="private-gate-footer">
+        <span>SESSION SEALED</span>
+        <span>LOCAL / PRIVATE / CAPTAIN ONLY</span>
+      </footer>
+    </main>
+  );
+}
+
+export default PrivateGate;

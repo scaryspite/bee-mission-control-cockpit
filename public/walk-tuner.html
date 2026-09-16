@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beeps Walk Cycle & Leg Alignment Tuner</title>
+  <style>
+    :root {
+      --void: #05080c;
+      --panel: #0b1118;
+      --panel-border: rgba(56, 189, 248, 0.25);
+      --accent: #38bdf8;
+      --accent-pink: #f472b6;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--void);
+      color: var(--text);
+      font-family: var(--font);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header.hud-bar {
+      height: 48px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 0.85rem;
+      z-index: 100;
+    }
+    .hud-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+    .hud-title span {
+      background: var(--accent);
+      color: var(--void);
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 800;
+    }
+    .hud-status {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+    .viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: radial-gradient(circle at center, #111a26 0%, #05080c 100%);
+      overflow: hidden;
+    }
+    .stage-wrapper {
+      position: relative;
+      width: 380px;
+      height: 570px;
+      border: 1px dashed rgba(56, 189, 248, 0.35);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    .ground-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 22px;
+      height: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .center-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      background: var(--accent-pink);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .actor {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .pet-frame-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center bottom;
+      pointer-events: none;
+      opacity: 0;
+      transition: none;
+    }
+    .pet-frame-layer.visible {
+      opacity: 1;
+    }
+    .pet-frame-layer.ghost {
+      opacity: 0.35 !important;
+      filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.8));
+    }
+    aside.control-panel {
+      width: 360px;
+      background: var(--panel);
+      border-left: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      font-size: 0.8rem;
+      overflow-y: auto;
+    }
+    .panel-section {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .section-title {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-group {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .btn-group-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    button.btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+      padding: 7px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-family: inherit;
+      transition: all 120ms ease;
+      text-align: center;
+    }
+    button.btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    button.btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--void);
+      font-weight: 700;
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+    .slider-row label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      flex: 1;
+    }
+    .slider-row input[type="range"] {
+      flex: 1.8;
+      accent-color: var(--accent);
+    }
+    .slider-row input[type="number"] {
+      width: 58px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+      padding: 3px 5px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      text-align: right;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .checkbox-row input {
+      accent-color: var(--accent);
+    }
+    .code-box {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: #7dd3fc;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <header class="hud-bar">
+    <div class="hud-title">
+      <span>WALK TUNER</span> BEEPS STRIDE & LEG ALIGNMENT
+    </div>
+    <div class="hud-status">
+      Live Asset Inspector &bull; Port 4173
+    </div>
+  </header>
+
+  <main class="main-workspace">
+    <section class="viewport">
+      <div class="stage-wrapper">
+        <div class="ground-line"></div>
+        <div class="center-line"></div>
+
+        <div class="actor" id="actor">
+          <img id="img-a" class="pet-frame-layer visible" src="/assets/pet-frame-walk-l-a.png" alt="Frame A">
+          <img id="img-c" class="pet-frame-layer" src="/assets/pet-frame-walk-l-c.png" alt="Frame C">
+          <img id="img-b" class="pet-frame-layer" src="/assets/pet-frame-walk-l-b.png" alt="Frame B">
+          <img id="img-d" class="pet-frame-layer" src="/assets/pet-frame-walk-l-d.png" alt="Frame D">
+        </div>
+      </div>
+    </section>
+
+    <aside class="control-panel">
+      <div class="panel-section">
+        <div class="section-title">1. Direction & Playback</div>
+        <div class="btn-group btn-group-2">
+          <button class="btn active" id="btn-dir-l">Walk Left</button>
+          <button class="btn" id="btn-dir-r">Walk Right</button>
+        </div>
+        <div class="btn-group btn-group-2">
+          <button class="btn active" id="btn-play">▶ Play Cycle</button>
+          <button class="btn" id="btn-pause">⏸ Step Frame</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">2. Frame Select (Manual Step)</div>
+        <div class="btn-group">
+          <button class="btn" id="btn-frame-a">A (Left Fwd)</button>
+          <button class="btn" id="btn-frame-c">C (Pass 1)</button>
+          <button class="btn" id="btn-frame-b">B (Right Fwd)</button>
+          <button class="btn" id="btn-frame-d">D (Pass 2)</button>
+        </div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="check-ghost">
+          <span>Onion Skin: Overlay Frame A Ghost</span>
+        </label>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">3. Frame B (Right Leg) Offsets</div>
+        <div class="slider-row">
+          <label>X Shift (px)</label>
+          <input type="range" id="slider-bx" min="-120" max="120" value="0" step="1">
+          <input type="number" id="num-bx" value="0">
+        </div>
+        <div class="slider-row">
+          <label>Y Shift (px)</label>
+          <input type="range" id="slider-by" min="-60" max="60" value="0" step="1">
+          <input type="number" id="num-by" value="0">
+        </div>
+        <button class="btn" id="btn-reset-b" style="width: 100%; margin-top: 4px;">Reset Frame B Offsets</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">4. Cycle Dynamics</div>
+        <div class="slider-row">
+          <label>Cycle Time (s)</label>
+          <input type="range" id="slider-speed" min="0.3" max="1.4" value="0.68" step="0.02">
+          <input type="number" id="num-speed" value="0.68" step="0.02">
+        </div>
+        <div class="slider-row">
+          <label>Pelvic Bob (px)</label>
+          <input type="range" id="slider-bob" min="0" max="14" value="5" step="1">
+          <input type="number" id="num-bob" value="5">
+        </div>
+        <div class="slider-row">
+          <label>Tilt Angle (deg)</label>
+          <input type="range" id="slider-tilt" min="0" max="6" value="2.5" step="0.5">
+          <input type="number" id="num-tilt" value="2.5" step="0.5">
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">
+          5. Calibration Export
+          <button class="btn" id="btn-copy" style="padding: 2px 8px; font-size: 0.65rem;">Copy</button>
+        </div>
+        <div class="code-box" id="code-output"></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const FRAMES = ['a', 'c', 'b', 'd'];
+    let currentDir = 'l';
+    let currentFrameIdx = 0;
+    let isPlaying = true;
+    let cycleDuration = 0.68;
+    let bobHeight = 5;
+    let tiltDeg = 2.5;
+    let bx = 0;
+    let by = 0;
+    let ghostA = false;
+
+    const imgA = document.getElementById("img-a");
+    const imgC = document.getElementById("img-c");
+    const imgB = document.getElementById("img-b");
+    const imgD = document.getElementById("img-d");
+    const imgs = { a: imgA, c: imgC, b: imgB, d: imgD };
+
+    const actor = document.getElementById("actor");
+    const codeOutput = document.getElementById("code-output");
+
+    function updateSources() {
+      const v = Date.now();
+      imgA.src = `/assets/pet-frame-walk-${currentDir}-a.png?v=${v}`;
+      imgC.src = `/assets/pet-frame-walk-${currentDir}-c.png?v=${v}`;
+      imgB.src = `/assets/pet-frame-walk-${currentDir}-b.png?v=${v}`;
+      imgD.src = `/assets/pet-frame-walk-${currentDir}-d.png?v=${v}`;
+    }
+
+    function render() {
+      FRAMES.forEach((f, idx) => {
+        const el = imgs[f];
+        el.classList.toggle('visible', idx === currentFrameIdx);
+        el.classList.remove('ghost');
+        if (f === 'b') {
+          el.style.transform = `translate(${bx}px, ${by}px)`;
+        } else {
+          el.style.transform = 'none';
+        }
+      });
+
+      if (ghostA && currentFrameIdx !== 0) {
+        imgA.classList.add('visible', 'ghost');
+      }
+
+      // Update button states
+      document.getElementById("btn-frame-a").classList.toggle('active', currentFrameIdx === 0);
+      document.getElementById("btn-frame-c").classList.toggle('active', currentFrameIdx === 1);
+      document.getElementById("btn-frame-b").classList.toggle('active', currentFrameIdx === 2);
+      document.getElementById("btn-frame-d").classList.toggle('active', currentFrameIdx === 3);
+
+      // Actor bob & tilt calculation
+      let bob = 0;
+      let tilt = 0;
+      if (currentFrameIdx === 0) { bob = 0; tilt = -tiltDeg; }
+      else if (currentFrameIdx === 1) { bob = -bobHeight; tilt = -tiltDeg * 0.4; }
+      else if (currentFrameIdx === 2) { bob = 0; tilt = tiltDeg; }
+      else if (currentFrameIdx === 3) { bob = -bobHeight; tilt = tiltDeg * 0.4; }
+
+      if (currentDir === 'r') tilt = -tilt;
+      actor.style.transform = `translateY(${bob}px) rotate(${tilt}deg)`;
+
+      // Code export
+      codeOutput.textContent = `// Walk Tuning Config
+Frame B Offset: { x: ${bx}px, y: ${by}px }
+Cycle Speed: ${cycleDuration}s
+Bob Height: ${bobHeight}px
+Tilt: ${tiltDeg}deg
+Active Frame: ${FRAMES[currentFrameIdx].toUpperCase()}`;
+    }
+
+    let cycleTimer = null;
+    function startCycle() {
+      if (cycleTimer) clearInterval(cycleTimer);
+      const stepMs = (cycleDuration * 1000) / 4;
+      cycleTimer = setInterval(() => {
+        if (!isPlaying) return;
+        currentFrameIdx = (currentFrameIdx + 1) % 4;
+        render();
+      }, stepMs);
+    }
+
+    // Direction buttons
+    document.getElementById("btn-dir-l").addEventListener("click", () => {
+      currentDir = 'l';
+      document.getElementById("btn-dir-l").classList.add("active");
+      document.getElementById("btn-dir-r").classList.remove("active");
+      updateSources();
+      render();
+    });
+    document.getElementById("btn-dir-r").addEventListener("click", () => {
+      currentDir = 'r';
+      document.getElementById("btn-dir-r").classList.add("active");
+      document.getElementById("btn-dir-l").classList.remove("active");
+      updateSources();
+      render();
+    });
+
+    // Play / Pause
+    document.getElementById("btn-play").addEventListener("click", () => {
+      isPlaying = true;
+      document.getElementById("btn-play").classList.add("active");
+      document.getElementById("btn-pause").classList.remove("active");
+      startCycle();
+    });
+    document.getElementById("btn-pause").addEventListener("click", () => {
+      isPlaying = false;
+      document.getElementById("btn-pause").classList.add("active");
+      document.getElementById("btn-play").classList.remove("active");
+    });
+
+    // Frame Buttons
+    FRAMES.forEach((f, idx) => {
+      document.getElementById(`btn-frame-${f}`).addEventListener("click", () => {
+        isPlaying = false;
+        document.getElementById("btn-pause").classList.add("active");
+        document.getElementById("btn-play").classList.remove("active");
+        currentFrameIdx = idx;
+        render();
+      });
+    });
+
+    // Ghost toggle
+    const ghostCheck = document.getElementById("check-ghost");
+    ghostCheck.addEventListener("change", (e) => {
+      ghostA = e.target.checked;
+      render();
+    });
+
+    // Frame B Offsets
+    const sliderBx = document.getElementById("slider-bx");
+    const numBx = document.getElementById("num-bx");
+    const sliderBy = document.getElementById("slider-by");
+    const numBy = document.getElementById("num-by");
+
+    sliderBx.addEventListener("input", (e) => {
+      bx = parseInt(e.target.value, 10);
+      numBx.value = bx;
+      render();
+    });
+    numBx.addEventListener("input", (e) => {
+      bx = parseInt(e.target.value, 10) || 0;
+      sliderBx.value = bx;
+      render();
+    });
+
+    sliderBy.addEventListener("input", (e) => {
+      by = parseInt(e.target.value, 10);
+      numBy.value = by;
+      render();
+    });
+    numBy.addEventListener("input", (e) => {
+      by = parseInt(e.target.value, 10) || 0;
+      sliderBy.value = by;
+      render();
+    });
+
+    document.getElementById("btn-reset-b").addEventListener("click", () => {
+      bx = 0; by = 0;
+      sliderBx.value = 0; numBx.value = 0;
+      sliderBy.value = 0; numBy.value = 0;
+      render();
+    });
+
+    // Dynamics
+    const sliderSpeed = document.getElementById("slider-speed");
+    const numSpeed = document.getElementById("num-speed");
+    sliderSpeed.addEventListener("input", (e) => {
+      cycleDuration = parseFloat(e.target.value);
+      numSpeed.value = cycleDuration;
+      startCycle();
+      render();
+    });
+    numSpeed.addEventListener("input", (e) => {
+      cycleDuration = parseFloat(e.target.value) || 0.68;
+      sliderSpeed.value = cycleDuration;
+      startCycle();
+      render();
+    });
+
+    const sliderBob = document.getElementById("slider-bob");
+    const numBob = document.getElementById("num-bob");
+    sliderBob.addEventListener("input", (e) => {
+      bobHeight = parseInt(e.target.value, 10);
+      numBob.value = bobHeight;
+      render();
+    });
+    numBob.addEventListener("input", (e) => {
+      bobHeight = parseInt(e.target.value, 10) || 0;
+      sliderBob.value = bobHeight;
+      render();
+    });
+
+    const sliderTilt = document.getElementById("slider-tilt");
+    const numTilt = document.getElementById("num-tilt");
+    sliderTilt.addEventListener("input", (e) => {
+      tiltDeg = parseFloat(e.target.value);
+      numTilt.value = tiltDeg;
+      render();
+    });
+    numTilt.addEventListener("input", (e) => {
+      tiltDeg = parseFloat(e.target.value) || 0;
+      sliderTilt.value = tiltDeg;
+      render();
+    });
+
+    // Copy button
+    document.getElementById("btn-copy").addEventListener("click", () => {
+      navigator.clipboard.writeText(codeOutput.textContent);
+      const btn = document.getElementById("btn-copy");
+      btn.textContent = "Copied!";
+      setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+    });
+
+    startCycle();
+    render();
+  </script>
+</body>
+</html>

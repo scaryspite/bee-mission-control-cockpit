@@ -1,0 +1,378 @@
+/* ==========================================================================
+   Crew Actors Layer (Alloy, Nebs, Doublestuffiana)
+   Fully animated autonomous companions with roaming patrols and speech bubbles
+   ========================================================================== */
+
+.crew-actors-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 18;
+  overflow: hidden;
+}
+
+.crew-actor-unit {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: left var(--walk-duration, 1400ms) cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: left, transform;
+  pointer-events: auto;
+  user-select: none;
+}
+
+/* ==========================================================================
+   Actor Interactive Button & Sprite Frame
+   ========================================================================== */
+
+.crew-actor-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), filter 0.22s ease;
+}
+
+.crew-actor-btn:hover {
+  transform: translateY(-5px) scale(1.04);
+  filter: drop-shadow(0 0 16px var(--crew-glow, rgba(121, 215, 229, 0.5)));
+}
+
+.crew-actor-btn:focus-visible {
+  outline: 2px solid var(--crew-accent, #79d7e5);
+  outline-offset: 4px;
+}
+
+.crew-actor-halo {
+  position: absolute;
+  bottom: 12px;
+  width: 75%;
+  height: 18px;
+  background: radial-gradient(ellipse at center, var(--crew-glow, rgba(121, 215, 229, 0.35)) 0%, transparent 72%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.8;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.crew-actor-btn:hover .crew-actor-halo {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.crew-actor-sprite {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.72));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* ==========================================================================
+   Character Specific Sizing (Prominent & Alive)
+   ========================================================================== */
+
+/* 1. Alloy - Cyber-Scrapper Cat on Top Deck Catwalk */
+.crew-actor-sprite--alloy {
+  width: clamp(124px, 11vw, 154px);
+  height: auto;
+}
+
+/* 2. Nebs - Tall Sentinel Officer on Left Tactical Deck */
+.crew-actor-sprite--nebs {
+  width: clamp(100px, 9vw, 130px);
+  height: clamp(195px, 23vh, 255px);
+}
+
+/* 3. Doublestuffiana - Armored Powerhouse on Right Heavy Deck */
+.crew-actor-sprite--doublestuff {
+  width: clamp(138px, 12.5vw, 178px);
+  height: clamp(160px, 19.5vh, 210px);
+}
+
+/* ==========================================================================
+   Dynamic Motion & Keyframe Cycles (Walk, Idle, Cheer)
+   ========================================================================== */
+
+/* --- Alloy Animations --- */
+.crew-actor-unit--alloy[data-mode="idle"] .crew-actor-sprite {
+  animation: alloy-idle-gremlin 3.6s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--alloy[data-mode="walk"] .crew-actor-sprite {
+  animation: alloy-walk-scamper 0.32s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--alloy[data-mode="cheer"] .crew-actor-sprite {
+  animation: alloy-cheer-bounce 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
+}
+
+@keyframes alloy-idle-gremlin {
+  0% { transform: translateY(0) rotate(0deg); }
+  40% { transform: translateY(-3px) rotate(-1deg); }
+  80% { transform: translateY(1px) rotate(1deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes alloy-walk-scamper {
+  0% { transform: translateY(0) rotate(-1.5deg); }
+  100% { transform: translateY(-5px) rotate(1.5deg); }
+}
+
+@keyframes alloy-cheer-bounce {
+  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px #e2ad55); }
+  100% { transform: scale(1.08) translateY(-10px); filter: drop-shadow(0 0 24px #e2ad55); }
+}
+
+/* --- Nebs Animations --- */
+.crew-actor-unit--nebs[data-mode="idle"] .crew-actor-sprite {
+  animation: nebs-idle-sentinel 4.2s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--nebs[data-mode="walk"] .crew-actor-sprite {
+  animation: nebs-walk-stride 0.44s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--nebs[data-mode="cheer"] .crew-actor-sprite {
+  animation: nebs-cheer-salute 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
+}
+
+@keyframes nebs-idle-sentinel {
+  0% { transform: scale(1) translateY(0); }
+  100% { transform: scale(1.025) translateY(-3px); }
+}
+
+@keyframes nebs-walk-stride {
+  0% { transform: translateY(0) rotate(-1deg); }
+  100% { transform: translateY(-6px) rotate(1deg); }
+}
+
+@keyframes nebs-cheer-salute {
+  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 12px #b28ae8); }
+  100% { transform: scale(1.06) translateY(-8px); filter: drop-shadow(0 0 26px #b28ae8); }
+}
+
+/* --- Doublestuffiana Animations --- */
+.crew-actor-unit--doublestuff[data-mode="idle"] .crew-actor-sprite {
+  animation: doublestuff-idle-heart 3.8s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--doublestuff[data-mode="walk"] .crew-actor-sprite {
+  animation: doublestuff-walk-waddle 0.38s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--doublestuff[data-mode="cheer"] .crew-actor-sprite {
+  animation: doublestuff-cheer-flex 0.58s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
+}
+
+@keyframes doublestuff-idle-heart {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.015, 0.99); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes doublestuff-walk-waddle {
+  0% { transform: translateY(0) rotate(-2deg); }
+  100% { transform: translateY(-5px) rotate(2deg); }
+}
+
+@keyframes doublestuff-cheer-flex {
+  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px #f180bd); }
+  100% { transform: scale(1.08) translateY(-8px); filter: drop-shadow(0 0 26px #f180bd); }
+}
+
+/* ==========================================================================
+   Actor Status Badge
+   ========================================================================== */
+
+.crew-actor-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  margin-top: 5px;
+  padding: 3px 7px;
+  border-radius: 3px;
+  background: rgba(6, 11, 17, 0.92);
+  border: 1px solid var(--crew-accent, rgba(121, 215, 229, 0.35));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  font-family: var(--font-display, "Courier New", monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.crew-actor-btn:hover .crew-actor-badge {
+  opacity: 1;
+  border-color: var(--crew-accent);
+  box-shadow: 0 0 10px var(--crew-glow);
+}
+
+.crew-badge-name {
+  font-size: 0.56rem;
+  font-weight: 700;
+  color: #f1f4f8;
+  line-height: 1.1;
+}
+
+.crew-badge-role {
+  font-size: 0.44rem;
+  font-weight: 600;
+  color: var(--crew-accent);
+  line-height: 1.1;
+}
+
+/* ==========================================================================
+   Lively Sci-Fi Speech Bubble
+   ========================================================================== */
+
+.crew-speech-bubble {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 170px;
+  max-width: 230px;
+  padding: 8px 12px 10px;
+  border-radius: 6px;
+  background: rgba(7, 12, 19, 0.96);
+  border: 1px solid var(--crew-accent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 18px var(--crew-glow);
+  backdrop-filter: blur(8px);
+  z-index: 25;
+  animation: bubble-pop-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes bubble-pop-in {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(0.92); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+.crew-speech-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+  font-family: var(--font-display, monospace);
+  font-size: 0.48rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.crew-speech-name {
+  font-weight: 700;
+  color: var(--crew-accent);
+}
+
+.crew-speech-role {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.crew-speech-text {
+  margin: 0;
+  font-family: var(--font-display, monospace);
+  font-size: 0.66rem;
+  line-height: 1.35;
+  color: #f7f9fb;
+  letter-spacing: 0.02em;
+}
+
+.crew-speech-caret {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--crew-accent);
+}
+
+/* 4. Rivet - Chief Mechanic */
+.crew-actor-sprite--rivet {
+  width: clamp(110px, 10vw, 140px);
+  height: clamp(170px, 20vh, 220px);
+}
+
+/* 5. Beeps - Mission Co-Pilot */
+.crew-actor-sprite--beeps {
+  width: clamp(110px, 10vw, 140px);
+  height: clamp(170px, 20vh, 220px);
+}
+
+/* --- Rivet Animations --- */
+.crew-actor-unit--rivet[data-mode="idle"] .crew-actor-sprite {
+  animation: rivet-idle-mechanic 4.0s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--rivet[data-mode="walk"] .crew-actor-sprite {
+  animation: rivet-walk-step 0.4s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--rivet[data-mode="cheer"] .crew-actor-sprite {
+  animation: rivet-cheer-wrench 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
+}
+
+@keyframes rivet-idle-mechanic {
+  0% { transform: scale(1) translateY(0); }
+  100% { transform: scale(1.02) translateY(-2px); }
+}
+
+@keyframes rivet-walk-step {
+  0% { transform: translateY(0) rotate(-1.5deg); }
+  100% { transform: translateY(-5px) rotate(1.5deg); }
+}
+
+@keyframes rivet-cheer-wrench {
+  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px #4caf50); }
+  100% { transform: scale(1.06) translateY(-8px); filter: drop-shadow(0 0 24px #4caf50); }
+}
+
+/* --- Beeps Animations --- */
+.crew-actor-unit--beeps[data-mode="idle"] .crew-actor-sprite {
+  animation: beeps-idle-copilot 3.8s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--beeps[data-mode="walk"] .crew-actor-sprite {
+  animation: beeps-walk-stride 0.35s ease-in-out infinite alternate;
+}
+
+.crew-actor-unit--beeps[data-mode="cheer"] .crew-actor-sprite {
+  animation: beeps-cheer-joy 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
+}
+
+@keyframes beeps-idle-copilot {
+  0% { transform: scale(1) translateY(0); }
+  100% { transform: scale(1.02) translateY(-3px); }
+}
+
+@keyframes beeps-walk-stride {
+  0% { transform: translateY(0) rotate(-1.5deg); }
+  100% { transform: translateY(-5px) rotate(1.5deg); }
+}
+
+@keyframes beeps-cheer-joy {
+  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px #00e5ff); }
+  100% { transform: scale(1.08) translateY(-10px); filter: drop-shadow(0 0 24px #00e5ff); }
+}
+
+/* Hide crew overlay on cramped mobile viewports if necessary */
+@media (max-width: 680px) {
+  .crew-actors-layer {
+    display: none;
+  }
+}

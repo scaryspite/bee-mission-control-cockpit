@@ -1,0 +1,374 @@
+.beeps-motion {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.beeps-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  image-rendering: pixelated;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.beeps-frame--ambient { opacity: 1; animation: beeps-breathe 3.7s ease-in-out infinite; }
+.beeps-frame--ambient-alt { opacity: 0; animation: beeps-ambient-alt 2.8s steps(1, end) infinite; }
+
+.beeps-motion[data-speaking="true"] {
+  animation: beeps-talking-bounce 0.28s ease-in-out infinite alternate;
+}
+
+@keyframes beeps-talking-bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-3px); }
+}
+
+.beeps-motion[data-speaking="true"] .beeps-presence-field {
+  opacity: 0.95;
+  filter: drop-shadow(0 0 8px var(--beeps-room-accent, var(--moon-blue)));
+  animation: beeps-floor-pulse 1.2s ease-in-out infinite;
+}
+
+.beeps-motion[data-speaking="true"] .beeps-presence-beacon {
+  transform: translateX(-50%) rotate(45deg) scale(1.4);
+  box-shadow: 0 0 16px var(--beeps-room-accent, var(--moon-blue));
+}
+
+/* A few exported state PNGs carry a disconnected edge fragment. Keep the
+   character silhouette, but remove those pixels before they reach the room. */
+
+.beeps-motion[data-mode="walk"] .beeps-frame--ambient,
+.beeps-motion[data-mode="interaction"] .beeps-frame--ambient { opacity: 0; animation: none; }
+
+.beeps-frame--walk { display: none; }
+
+.beeps-motion[data-mode="walk"] .beeps-frame--walk { display: block; }
+.beeps-motion[data-mode="walk"] .beeps-frame--walk-a { animation: beeps-walk-4-a 640ms steps(1, end) infinite; }
+.beeps-motion[data-mode="walk"] .beeps-frame--walk-c { animation: beeps-walk-4-c 640ms steps(1, end) infinite; }
+.beeps-motion[data-mode="walk"] .beeps-frame--walk-b { animation: beeps-walk-4-b 640ms steps(1, end) infinite; }
+.beeps-motion[data-mode="walk"] .beeps-frame--walk-d { animation: beeps-walk-4-d 640ms steps(1, end) infinite; }
+
+.beeps-frame--interaction { display: none; }
+.beeps-frame--interaction {
+  transform: scale(var(--beeps-pose-scale, 1));
+  transform-origin: center bottom;
+}
+.beeps-motion[data-mode="interaction"] .beeps-frame--interaction:not(.beeps-frame--interaction-alt) {
+  display: block;
+  opacity: 1;
+  animation: beeps-interaction-a 2.8s steps(1, end) infinite;
+}
+.beeps-motion[data-mode="interaction"] .beeps-frame--interaction-alt {
+  display: block;
+  opacity: 0;
+  animation: beeps-interaction-b 2.8s steps(1, end) infinite;
+}
+
+.beeps-motion[data-mode="interaction"][data-interaction-alt="false"] .beeps-frame--interaction:not(.beeps-frame--interaction-alt) {
+  opacity: 1;
+  animation: none;
+}
+
+.beeps-held-prop {
+  position: absolute;
+  display: block;
+  z-index: 2;
+  opacity: 1;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.32));
+}
+
+.beeps-motion[data-held-kind="coffee"] .beeps-held-prop {
+  inset: 9% auto auto 33%;
+  width: 25%;
+  height: 18%;
+}
+
+.beeps-motion[data-held-kind="file"] .beeps-held-prop,
+.beeps-motion[data-held-kind="notebook"] .beeps-held-prop,
+.beeps-motion[data-held-kind="board"] .beeps-held-prop,
+.beeps-motion[data-held-kind="reading"] .beeps-held-prop,
+.beeps-motion[data-held-kind="plans"] .beeps-held-prop,
+.beeps-motion[data-held-kind="desk"] .beeps-held-prop,
+.beeps-motion[data-held-kind="shelf"] .beeps-held-prop {
+  inset: 30% auto auto 26%;
+  width: 28%;
+  height: 21%;
+}
+
+.beeps-motion[data-held-kind="toolkit"] .beeps-held-prop,
+.beeps-motion[data-held-kind="workbench"] .beeps-held-prop,
+.beeps-motion[data-held-kind="experiment"] .beeps-held-prop {
+  inset: 48% auto auto 22%;
+  width: 36%;
+  height: 24%;
+}
+
+.beeps-motion[data-held-kind="floppy"] .beeps-held-prop {
+  inset: 49% auto auto 36%;
+  width: 23%;
+  height: 20%;
+}
+
+.beeps-motion[data-held-kind="crate"] .beeps-held-prop {
+  inset: 51% auto auto 29%;
+  width: 31%;
+  height: 22%;
+}
+
+.beeps-motion[data-held-kind="handheld"] .beeps-held-prop {
+  inset: 30% auto auto 37%;
+  width: 19%;
+  height: 22%;
+}
+
+.beeps-presence-field {
+  position: absolute;
+  right: 7%;
+  bottom: 1%;
+  left: 7%;
+  height: 15%;
+  border: 1px solid color-mix(in srgb, var(--beeps-room-accent, var(--moon-blue)) 32%, transparent);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--beeps-room-accent, var(--moon-blue)) 18%, transparent), transparent 70%);
+  opacity: 0.65;
+  transform: perspective(60px) rotateX(50deg);
+  animation: beeps-floor-pulse 3.4s ease-in-out infinite;
+}
+
+.beeps-presence-beacon {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--beeps-room-accent, var(--moon-blue));
+  background: var(--beeps-room-accent, var(--moon-blue));
+  box-shadow: 0 0 12px var(--beeps-room-accent, var(--moon-blue));
+  opacity: 0.8;
+  transform: translateX(-50%) rotate(45deg);
+  animation: beeps-beacon 2.6s ease-in-out infinite;
+}
+
+.beeps-effect {
+  position: absolute;
+  z-index: 3;
+  display: none;
+  pointer-events: none;
+}
+
+.beeps-motion[data-state="success"] .beeps-effect--success {
+  top: 5%;
+  right: 13%;
+  left: 13%;
+  display: block;
+  height: 34%;
+}
+
+.beeps-effect--success::before {
+  position: absolute;
+  top: 9%;
+  left: 10%;
+  width: 80%;
+  height: 28%;
+  border-top: 2px solid var(--soft-pink);
+  border-radius: 50%;
+  box-shadow: 0 -4px 14px rgba(241, 128, 189, 0.7);
+  content: "";
+  opacity: 0.75;
+  transform: rotate(-7deg);
+  animation: beeps-halo-sweep 1.8s ease-out infinite;
+}
+
+.beeps-effect--success i {
+  position: absolute;
+  display: block;
+  width: 12px;
+  height: 12px;
+  background: var(--soft-pink);
+  clip-path: polygon(50% 0, 61% 38%, 100% 50%, 61% 62%, 50% 100%, 39% 62%, 0 50%, 39% 38%);
+  animation: beeps-star-burst 1.8s ease-out infinite;
+}
+
+.beeps-effect--success i:nth-child(1) { left: 5%; bottom: 0; animation-delay: 40ms; }
+.beeps-effect--success i:nth-child(2) { left: 50%; bottom: 5%; animation-delay: 160ms; }
+.beeps-effect--success i:nth-child(3) { right: 4%; bottom: 0; animation-delay: 280ms; }
+
+.beeps-motion[data-state="error"] .beeps-effect--error {
+  top: 30%;
+  right: 5%;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid #f26c8f;
+  color: #f26c8f;
+  background: rgba(49, 10, 24, 0.72);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  animation: beeps-warning 820ms steps(2, end) infinite;
+}
+
+.beeps-motion[data-state="serious"] .beeps-effect--serious {
+  right: 8%;
+  bottom: 25%;
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--amber);
+  box-shadow: 0 0 10px rgba(226, 173, 85, 0.7);
+  animation: beeps-monitor-line 2.6s ease-in-out infinite;
+}
+
+.beeps-motion[data-state="searching"] .beeps-effect--searching {
+  top: 31%;
+  right: 10%;
+  left: 10%;
+  display: block;
+  height: 2px;
+  background: var(--early-purple);
+  box-shadow: 0 0 9px var(--early-purple);
+  animation: beeps-archive-scan 1.8s ease-in-out infinite;
+}
+
+.beeps-motion[data-state="thinking"] .beeps-effect--thinking {
+  top: 18%;
+  right: 2%;
+  display: block;
+  width: 34%;
+  height: 22%;
+}
+
+.beeps-effect--thinking i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--moon-blue);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--moon-blue);
+  animation: beeps-thought-orbit 2.4s linear infinite;
+}
+
+.beeps-effect--thinking i:nth-child(1) { top: 9%; left: 48%; }
+.beeps-effect--thinking i:nth-child(2) { top: 48%; left: 16%; animation-delay: 180ms; }
+.beeps-effect--thinking i:nth-child(3) { right: 10%; bottom: 9%; animation-delay: 360ms; }
+
+@keyframes beeps-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.94; }
+}
+
+@keyframes beeps-walk-4-a {
+  0%, 24.9% { opacity: 1; transform: translateY(0); }
+  25%, 100% { opacity: 0; }
+}
+
+@keyframes beeps-walk-4-c {
+  0%, 24.9% { opacity: 0; }
+  25%, 49.9% { opacity: 1; transform: translateY(-2px); }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes beeps-walk-4-b {
+  0%, 49.9% { opacity: 0; }
+  50%, 74.9% { opacity: 1; transform: translateY(0); }
+  75%, 100% { opacity: 0; }
+}
+
+@keyframes beeps-walk-4-d {
+  0%, 74.9% { opacity: 0; }
+  75%, 99.9% { opacity: 1; transform: translateY(-2px); }
+  100% { opacity: 0; }
+}
+
+@keyframes beeps-interaction-a {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes beeps-interaction-b {
+  0%, 49% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+
+@keyframes beeps-ambient-alt {
+  0%, 49% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+
+@keyframes beeps-floor-pulse {
+  0%, 100% { opacity: 0.35; transform: perspective(60px) rotateX(50deg) scaleX(0.94); }
+  50% { opacity: 0.82; transform: perspective(60px) rotateX(50deg) scaleX(1.04); }
+}
+
+@keyframes beeps-beacon {
+  0%, 100% { opacity: 0.4; transform: translateX(-50%) rotate(45deg) scale(0.8); }
+  50% { opacity: 1; transform: translateX(-50%) rotate(45deg) scale(1.1); }
+}
+
+@keyframes beeps-halo-sweep {
+  0% { opacity: 0; transform: translateY(19px) scaleX(0.6); }
+  35% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-18px) scaleX(1.08); }
+}
+
+@keyframes beeps-star-burst {
+  0% { opacity: 0; transform: translateY(40px) scale(0.4) rotate(0deg); }
+  24% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-46px) scale(1) rotate(90deg); }
+}
+
+@keyframes beeps-warning {
+  0%, 100% { transform: translateX(0); }
+  30% { transform: translateX(-5px); }
+  60% { transform: translateX(4px); }
+}
+
+@keyframes beeps-monitor-line {
+  0%, 100% { opacity: 0.32; transform: translateX(-8px); }
+  50% { opacity: 1; transform: translateX(10px); }
+}
+
+@keyframes beeps-archive-scan {
+  0%, 100% { opacity: 0.25; transform: translateY(-12px) scaleX(0.72); }
+  50% { opacity: 1; transform: translateY(15px) scaleX(1); }
+}
+
+@keyframes beeps-thought-orbit {
+  0% { opacity: 0.35; transform: translate(0, 0) scale(0.7); }
+  50% { opacity: 1; transform: translate(5px, -7px) scale(1); }
+  100% { opacity: 0.35; transform: translate(0, 0) scale(0.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beeps-frame--ambient,
+  .beeps-frame--walk-a,
+  .beeps-frame--walk-c,
+  .beeps-frame--walk-b,
+  .beeps-frame--walk-d,
+  .beeps-frame--interaction-alt,
+  .beeps-presence-field,
+  .beeps-presence-beacon,
+  .beeps-effect { animation: none; }
+
+  .beeps-motion[data-mode="walk"] .beeps-frame--walk-c,
+  .beeps-motion[data-mode="walk"] .beeps-frame--walk-b,
+  .beeps-motion[data-mode="walk"] .beeps-frame--walk-d { opacity: 0; }
+  .beeps-motion[data-mode="walk"] .beeps-frame--walk-a { opacity: 1; }
+  .beeps-motion[data-mode="interaction"] .beeps-frame--interaction-alt { opacity: 0; }
+  .beeps-motion[data-mode="interaction"] .beeps-frame--interaction:not(.beeps-frame--interaction-alt) {
+    opacity: 1;
+    animation: none;
+  }
+}

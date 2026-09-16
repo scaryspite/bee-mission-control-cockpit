@@ -1,0 +1,1620 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Beeps Desktop Pet</title>
+    <style>
+      :root {
+        --cyan: #38bdf8;
+        --pink: #f472b6;
+        --purple: #c084fc;
+        --bg-glass: rgba(15, 23, 42, 0.92);
+        --border-glass: rgba(56, 189, 248, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html, body {
+        width: 100%;
+        height: 100%;
+        background: transparent !important;
+        overflow: hidden;
+        user-select: none;
+        -webkit-user-select: none;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      /* Desktop Pet Stage Container */
+      .pet-stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding-bottom: 6px;
+      }
+
+      /* Ground Contact Shadow & Neon Cyber Glow */
+      .pet-presence {
+        position: absolute;
+        bottom: 3px;
+        width: 156px;
+        height: 27px;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(56, 189, 248, 0.4) 35%, rgba(244, 114, 182, 0.12) 60%, transparent 75%);
+        filter: blur(2.5px);
+        pointer-events: none;
+        animation: presence-pulse 3.2s ease-in-out infinite alternate;
+        transition: transform 0.25s ease, opacity 0.25s ease;
+      }
+
+      @keyframes presence-pulse {
+        from { transform: scale(0.88); opacity: 0.65; }
+        to { transform: scale(1.08); opacity: 0.95; }
+      }
+
+      /* Compact Speech Bubble positioned right above actor */
+      .pet-bubble {
+        position: absolute;
+        bottom: 327px;
+        left: 10px;
+        right: 10px;
+        max-width: 220px;
+        margin: 0 auto;
+        background: var(--bg-glass);
+        border: 1px solid var(--border-glass);
+        border-radius: 10px;
+        padding: 7px 11px;
+        color: #f1f5f9;
+        font-size: 11.5px;
+        line-height: 1.35;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 12px rgba(56, 189, 248, 0.25);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        opacity: 0;
+        transform: translateY(-4px) scale(0.96);
+        transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+        z-index: 20;
+        max-height: 86px;
+        overflow: hidden;
+      }
+
+      .pet-bubble.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+      }
+
+      .pet-bubble::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px 5px 0 5px;
+        border-style: solid;
+        border-color: var(--bg-glass) transparent transparent transparent;
+      }
+
+      .pet-bubble-speaker {
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--cyan);
+        text-transform: uppercase;
+        margin-bottom: 2px;
+      }
+
+      .pet-bubble-text {
+        word-break: break-word;
+        display: -webkit-box;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      /* Compact Full Body Actor Box (2:3 Aspect Ratio matching 1024x1536) */
+      .pet-actor-box {
+        position: relative;
+        width: 210px;
+        height: 315px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        cursor: grab;
+        z-index: 2;
+        transition: transform 0.25s ease;
+      }
+
+      .pet-actor-box:hover .pet-frame {
+        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.45)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+      }
+
+      .pet-actor-box:active {
+        cursor: grabbing;
+      }
+
+      /* Base Frame Layers */
+      .pet-frame {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center bottom;
+        image-rendering: -webkit-optimize-contrast;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.65));
+        opacity: 0;
+        pointer-events: none;
+        user-select: none;
+        transition: opacity 0.12s ease;
+      }
+
+      /* Idle Animation: 2-Frame Cycle with Gentle Breathing */
+      .pet-actor-box[data-mode="idle"] .frame-idle-a {
+        opacity: 1;
+        animation: pet-idle-frame-a 2.8s steps(1, end) infinite, pet-breathe 3.4s ease-in-out infinite alternate;
+      }
+      .pet-actor-box[data-mode="idle"] .frame-idle-b {
+        opacity: 0;
+        animation: pet-idle-frame-b 2.8s steps(1, end) infinite, pet-breathe 3.4s ease-in-out infinite alternate;
+      }
+
+      @keyframes pet-idle-frame-a {
+        0%, 82%, 100% { opacity: 1; }
+        83%, 99% { opacity: 0; }
+      }
+      @keyframes pet-idle-frame-b {
+        0%, 82%, 100% { opacity: 0; }
+        83%, 99% { opacity: 1; }
+      }
+
+      @keyframes pet-breathe {
+        0% { transform: translateY(0) scaleY(1); }
+        50% { transform: translateY(-2px) scaleY(1.01) scaleX(0.995); }
+        100% { transform: translateY(0) scaleY(1); }
+      }
+
+      /* Walk Animation: Left / Right Stepping with Bob, Hip Sway & Distinct Swagger */
+            /* Walk Animation: Left / Right Stepping with Bob, Hip Sway & Distinct Swagger */
+      .pet-actor-box[data-mode^="walk"] .pet-frame {
+        transition: none !important;
+      }
+
+      .pet-actor-box[data-mode="walk-left"] {
+        transform-origin: 50% 95%;
+        animation: pet-walk-bob-left 0.68s ease-in-out infinite;
+      }
+      .pet-actor-box[data-mode="walk-right"] {
+        transform-origin: 50% 95%;
+        animation: pet-walk-bob-right 0.68s ease-in-out infinite;
+      }
+
+      /* Clean rhythmic stride bob & tilt on the whole character box */
+      @keyframes pet-walk-bob-left {
+        0%, 100% {
+          transform: translateY(0) rotate(-2.5deg);
+        }
+        25% {
+          transform: translateY(-5px) rotate(-1deg);
+        }
+        50% {
+          transform: translateY(0) rotate(2.5deg);
+        }
+        75% {
+          transform: translateY(-5px) rotate(1deg);
+        }
+      }
+
+      @keyframes pet-walk-bob-right {
+        0%, 100% {
+          transform: translateY(0) rotate(2.5deg);
+        }
+        25% {
+          transform: translateY(-5px) rotate(1deg);
+        }
+        50% {
+          transform: translateY(0) rotate(-2.5deg);
+        }
+        75% {
+          transform: translateY(-5px) rotate(-1deg);
+        }
+      }
+
+      /* Crisp 4-frame stride & passing cycle (a -> c -> b -> d) */
+      .pet-actor-box[data-mode="walk-left"] .frame-walk-l-a,
+      .pet-actor-box[data-mode="walk-right"] .frame-walk-r-a {
+        animation: pet-step-4-a 0.68s step-end infinite;
+      }
+      .pet-actor-box[data-mode="walk-left"] .frame-walk-l-c,
+      .pet-actor-box[data-mode="walk-right"] .frame-walk-r-c {
+        animation: pet-step-4-c 0.68s step-end infinite;
+      }
+      .pet-actor-box[data-mode="walk-left"] .frame-walk-l-b,
+      .pet-actor-box[data-mode="walk-right"] .frame-walk-r-b {
+        animation: pet-step-4-b 0.68s step-end infinite;
+      }
+      .pet-actor-box[data-mode="walk-left"] .frame-walk-l-d,
+      .pet-actor-box[data-mode="walk-right"] .frame-walk-r-d {
+        animation: pet-step-4-d 0.68s step-end infinite;
+      }
+
+      @keyframes pet-step-4-a {
+        0%, 24.99% { opacity: 1; }
+        25%, 100% { opacity: 0; }
+      }
+      @keyframes pet-step-4-c {
+        0%, 24.99% { opacity: 0; }
+        25%, 49.99% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+      }
+      @keyframes pet-step-4-b {
+        0%, 49.99% { opacity: 0; }
+        50%, 74.99% { opacity: 1; }
+        75%, 100% { opacity: 0; }
+      }
+      @keyframes pet-step-4-d {
+        0%, 74.99% { opacity: 0; }
+        75%, 100% { opacity: 1; }
+      }
+
+      /* Pose Modes: Coffee Sipping (2-Frame Cycle: holding cup / sipping cozy steam) */
+      .pet-actor-box[data-mode="coffee"] .frame-coffee-a {
+        opacity: 1;
+        animation: pet-coffee-step-a 2.6s step-end infinite;
+      }
+      .pet-actor-box[data-mode="coffee"] .frame-coffee-b {
+        opacity: 0;
+        animation: pet-coffee-step-b 2.6s step-end infinite;
+      }
+      @keyframes pet-coffee-step-a {
+        0%, 55%, 100% { opacity: 1; }
+        56%, 99% { opacity: 0; }
+      }
+      @keyframes pet-coffee-step-b {
+        0%, 55%, 100% { opacity: 0; }
+        56%, 99% { opacity: 1; }
+      }
+      .pet-actor-box[data-mode="coffee"] {
+        animation: pet-coffee-sip 2.6s ease-in-out infinite alternate;
+      }
+      @keyframes pet-coffee-sip {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-2px) scaleY(1.01); }
+        100% { transform: translateY(0); }
+      }
+
+      /* Pose Modes: Thinking & Telemetry Review (2-Frame Cycle: pondering / telemetry scanning) */
+      .pet-actor-box[data-mode="thinking"] .frame-thinking-a {
+        opacity: 1;
+        animation: pet-thinking-step-a 2.4s step-end infinite;
+      }
+      .pet-actor-box[data-mode="thinking"] .frame-thinking-b {
+        opacity: 0;
+        animation: pet-thinking-step-b 2.4s step-end infinite;
+      }
+      @keyframes pet-thinking-step-a {
+        0%, 50%, 100% { opacity: 1; }
+        51%, 99% { opacity: 0; }
+      }
+      @keyframes pet-thinking-step-b {
+        0%, 50%, 100% { opacity: 0; }
+        51%, 99% { opacity: 1; }
+      }
+      .pet-actor-box[data-mode="thinking"] {
+        animation: pet-thinking-ponder 2.4s ease-in-out infinite alternate;
+      }
+      @keyframes pet-thinking-ponder {
+        0% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-2px) rotate(-1.2deg); }
+        100% { transform: translateY(0) rotate(0deg); }
+      }
+
+      /* Cheering & Victory Celebration (2-Frame Cycle: arms up / fist pump down) */
+      .pet-actor-box[data-mode="cheer"] .frame-cheer-a,
+      .pet-actor-box[data-mode="success"] .frame-cheer-a {
+        opacity: 1;
+        animation: pet-cheer-step-a 0.42s step-end infinite;
+      }
+      .pet-actor-box[data-mode="cheer"] .frame-cheer-b,
+      .pet-actor-box[data-mode="success"] .frame-cheer-b {
+        opacity: 0;
+        animation: pet-cheer-step-b 0.42s step-end infinite;
+      }
+      @keyframes pet-cheer-step-a {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      @keyframes pet-cheer-step-b {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+      }
+      .pet-actor-box[data-mode="cheer"],
+      .pet-actor-box[data-mode="success"] {
+        animation: pet-cheer-bounce 0.42s cubic-bezier(0.18, 0.89, 0.32, 1.28) infinite alternate;
+      }
+      @keyframes pet-cheer-bounce {
+        0% { transform: translateY(0) scale(1); }
+        100% { transform: translateY(-7px) scale(1.02); }
+      }
+
+      /* Waving Greeting Pose (2-Frame Hand Wave Flutter) */
+      .pet-actor-box[data-mode="wave"] .frame-wave-a {
+        opacity: 1;
+        animation: pet-wave-step-a 0.28s step-end infinite;
+      }
+      .pet-actor-box[data-mode="wave"] .frame-wave-b {
+        opacity: 0;
+        animation: pet-wave-step-b 0.28s step-end infinite;
+      }
+      @keyframes pet-wave-step-a {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      @keyframes pet-wave-step-b {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+      }
+      .pet-actor-box[data-mode="wave"] {
+        animation: pet-wave-bob 0.56s ease-in-out infinite alternate;
+      }
+      @keyframes pet-wave-bob {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-3px); }
+      }
+
+      /* Sitting & Perching Pose (2-Frame Relaxed Posture Shift) */
+      .pet-actor-box[data-mode="sit"] .frame-sit-a {
+        opacity: 1;
+        animation: pet-sit-step-a 3.2s step-end infinite;
+      }
+      .pet-actor-box[data-mode="sit"] .frame-sit-b {
+        opacity: 0;
+        animation: pet-sit-step-b 3.2s step-end infinite;
+      }
+      @keyframes pet-sit-step-a {
+        0%, 65%, 100% { opacity: 1; }
+        66%, 99% { opacity: 0; }
+      }
+      @keyframes pet-sit-step-b {
+        0%, 65%, 100% { opacity: 0; }
+        66%, 99% { opacity: 1; }
+      }
+      .pet-actor-box[data-mode="sit"] {
+        animation: pet-sit-breathe 3.2s ease-in-out infinite alternate;
+      }
+      @keyframes pet-sit-breathe {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-1.5px) scaleY(1.008); }
+        100% { transform: translateY(0); }
+      }
+
+      /* Handheld Gaming Pose on Beanbag (2-Frame Cycle: playing console / smiling cozy win) */
+      .pet-actor-box[data-mode="game"] .frame-game-a {
+        opacity: 1;
+        animation: pet-game-step-a 2.8s step-end infinite;
+      }
+      .pet-actor-box[data-mode="game"] .frame-game-b {
+        opacity: 0;
+        animation: pet-game-step-b 2.8s step-end infinite;
+      }
+      @keyframes pet-game-step-a {
+        0%, 60%, 100% { opacity: 1; }
+        61%, 99% { opacity: 0; }
+      }
+      @keyframes pet-game-step-b {
+        0%, 60%, 100% { opacity: 0; }
+        61%, 99% { opacity: 1; }
+      }
+      .pet-actor-box[data-mode="game"] {
+        animation: pet-game-breathe 2.8s ease-in-out infinite alternate;
+      }
+      @keyframes pet-game-breathe {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-1.5px) scaleY(1.008); }
+        100% { transform: translateY(0); }
+      }
+
+
+      /* Peaceful Sleep & Nap Pose (2-Frame Breathing Cycle + Floating Cyber Zzz) */
+      .pet-actor-box[data-mode="sleep"] .frame-sleep-a {
+        opacity: 1;
+        animation: pet-sleep-step-a 2.8s step-end infinite;
+      }
+      .pet-actor-box[data-mode="sleep"] .frame-sleep-b {
+        opacity: 0;
+        animation: pet-sleep-step-b 2.8s step-end infinite;
+      }
+      @keyframes pet-sleep-step-a {
+        0%, 50%, 100% { opacity: 1; }
+        51%, 99% { opacity: 0; }
+      }
+      @keyframes pet-sleep-step-b {
+        0%, 50%, 100% { opacity: 0; }
+        51%, 99% { opacity: 1; }
+      }
+      .pet-actor-box[data-mode="sleep"] {
+        animation: pet-sleep-pulse 2.8s ease-in-out infinite alternate;
+      }
+      @keyframes pet-sleep-pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.012) translateY(-1.5px); }
+        100% { transform: scale(1); }
+      }
+
+      /* Console Working & Typing (2-Frame Step) */
+      .pet-actor-box[data-mode="work"] .frame-work-a {
+        opacity: 1;
+        animation: pet-work-step-a 0.38s step-end infinite;
+      }
+      .pet-actor-box[data-mode="work"] .frame-work-b {
+        opacity: 0;
+        animation: pet-work-step-b 0.38s step-end infinite;
+      }
+      @keyframes pet-work-step-a {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      @keyframes pet-work-step-b {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+      }
+
+      /* Talking Animation (Silent visual bounce + aura) */
+      .pet-actor-box[data-speaking="true"] {
+        animation: pet-talking-bounce 0.22s ease-in-out infinite alternate;
+      }
+      .pet-actor-box[data-speaking="true"] .pet-frame {
+        filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.55)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.65));
+      }
+
+      @keyframes pet-talking-bounce {
+        from { transform: translateY(0); }
+        to { transform: translateY(-3px); }
+      }
+
+      /* Click Hop */
+      .pet-actor-box.hop {
+        animation: pet-hop 0.36s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      }
+
+      @keyframes pet-hop {
+        0% { transform: translateY(0) scale(1); }
+        45% { transform: translateY(-12px) scale(1.04); }
+        75% { transform: translateY(2px) scale(0.98); }
+        100% { transform: translateY(0) scale(1); }
+      }
+
+      /* Dragging & Dangle Sway with Dedicated Airborne Dangle Sprite */
+      .pet-actor-box[data-dragging="true"] {
+        transform-origin: 50% 12% !important;
+        cursor: grabbing !important;
+        transition: none !important;
+        animation: pet-dangle-sway 0.72s ease-in-out infinite alternate !important;
+      }
+
+      @keyframes pet-dangle-sway {
+        0% {
+          transform: translateY(-8px) rotate(calc(var(--drag-tilt, 0deg) - 6.5deg)) scale(0.95, 1.05);
+        }
+        100% {
+          transform: translateY(-4px) rotate(calc(var(--drag-tilt, 0deg) + 6.5deg)) scale(0.97, 1.03);
+        }
+      }
+
+      /* Alternating Mid-Air Leg Kicks */
+      .pet-actor-box[data-dragging="true"] .frame-dangle-a {
+        opacity: 1 !important;
+        animation: pet-dangle-kick-a 0.36s step-end infinite !important;
+      }
+      .pet-actor-box[data-dragging="true"] .frame-dangle-b {
+        opacity: 0 !important;
+        animation: pet-dangle-kick-b 0.36s step-end infinite !important;
+      }
+      @keyframes pet-dangle-kick-a {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      @keyframes pet-dangle-kick-b {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+      }
+
+      .pet-actor-box[data-dragging="true"] .frame-idle-a,
+      .pet-actor-box[data-dragging="true"] .frame-idle-b,
+      .pet-actor-box[data-dragging="true"] .frame-walk-l-a,
+      .pet-actor-box[data-dragging="true"] .frame-walk-l-b,
+      .pet-actor-box[data-dragging="true"] .frame-walk-l-c,
+      .pet-actor-box[data-dragging="true"] .frame-walk-l-d,
+      .pet-actor-box[data-dragging="true"] .frame-walk-r-a,
+      .pet-actor-box[data-dragging="true"] .frame-walk-r-b,
+      .pet-actor-box[data-dragging="true"] .frame-walk-r-c,
+      .pet-actor-box[data-dragging="true"] .frame-walk-r-d,
+      .pet-actor-box[data-dragging="true"] .frame-coffee-a,
+      .pet-actor-box[data-dragging="true"] .frame-coffee-b,
+      .pet-actor-box[data-dragging="true"] .frame-thinking-a,
+      .pet-actor-box[data-dragging="true"] .frame-thinking-b,
+      .pet-actor-box[data-dragging="true"] .frame-cheer-a,
+      .pet-actor-box[data-dragging="true"] .frame-cheer-b,
+      .pet-actor-box[data-dragging="true"] .frame-wave-a,
+      .pet-actor-box[data-dragging="true"] .frame-wave-b,
+      .pet-actor-box[data-dragging="true"] .frame-sit-a,
+      .pet-actor-box[data-dragging="true"] .frame-sit-b,
+      .pet-actor-box[data-dragging="true"] .frame-game-a,
+      .pet-actor-box[data-dragging="true"] .frame-game-b,
+      .pet-actor-box[data-dragging="true"] .frame-sleep-a,
+      .pet-actor-box[data-dragging="true"] .frame-sleep-b,
+      .pet-actor-box[data-dragging="true"] .frame-work-a,
+      .pet-actor-box[data-dragging="true"] .frame-work-b {
+        opacity: 0 !important;
+        animation: none !important;
+      }
+
+      /* Landing Squash on Release */
+      .pet-actor-box.landing {
+        transform-origin: 50% 90%;
+        animation: pet-landing-squash 0.36s cubic-bezier(0.22, 1.2, 0.36, 1) !important;
+      }
+
+      @keyframes pet-landing-squash {
+        0% { transform: translateY(-5px) scale(0.96, 1.04); }
+        45% { transform: translateY(3px) scale(1.08, 0.92); }
+        75% { transform: translateY(-1px) scale(0.99, 1.01); }
+        100% { transform: translateY(0) scale(1, 1); }
+      }
+
+      /* Context Menu */
+      .pet-menu {
+        position: fixed;
+        background: var(--bg-glass);
+        border: 1px solid var(--border-glass);
+        border-radius: 10px;
+        padding: 6px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.85), 0 0 14px rgba(56, 189, 248, 0.25);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: none;
+        flex-direction: column;
+        gap: 2px;
+        z-index: 100;
+        width: 196px;
+        max-width: calc(100vw - 12px);
+        max-height: calc(100vh - 16px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        -webkit-app-region: no-drag;
+        box-sizing: border-box;
+      }
+
+      .pet-menu::-webkit-scrollbar {
+        width: 4px;
+      }
+      .pet-menu::-webkit-scrollbar-track {
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 4px;
+      }
+      .pet-menu::-webkit-scrollbar-thumb {
+        background: rgba(56, 189, 248, 0.5);
+        border-radius: 4px;
+      }
+      .pet-menu::-webkit-scrollbar-thumb:hover {
+        background: rgba(56, 189, 248, 0.85);
+      }
+
+      .pet-menu.visible {
+        display: flex;
+      }
+
+      .pet-menu-header {
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--cyan);
+        padding: 3px 6px 1px;
+        font-weight: 700;
+      }
+
+      .pet-menu-item {
+        background: transparent;
+        border: none;
+        color: #e2e8f0;
+        font-size: 10.5px;
+        font-family: inherit;
+        padding: 4px 6px;
+        border-radius: 5px;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.12s ease, color 0.12s ease;
+        box-sizing: border-box;
+      }
+
+      .pet-menu-item:hover {
+        background: rgba(56, 189, 248, 0.18);
+        color: #fff;
+      }
+
+      .pet-menu-item:active {
+        background: rgba(56, 189, 248, 0.28);
+      }
+
+      /* Compact 3-zone strip */
+      .pet-zone-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+        padding: 1px 0;
+      }
+
+      .pet-zone-btn {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 5px;
+        padding: 4px 2px;
+        font-size: 9.5px;
+        font-family: inherit;
+        color: #cbd5e1;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+        transition: all 0.15s ease;
+      }
+
+      .pet-zone-btn:hover {
+        background: rgba(56, 189, 248, 0.18);
+        border-color: rgba(56, 189, 248, 0.4);
+        color: #fff;
+      }
+
+      /* 2-Column Poses Matrix */
+      .pet-poses-matrix {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px;
+        padding: 1px 0;
+      }
+
+      .pet-pose-btn {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 4px;
+        padding: 3.5px 5px;
+        font-size: 9.5px;
+        font-family: inherit;
+        color: #cbd5e1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: all 0.12s ease;
+      }
+
+      .pet-pose-btn:hover {
+        background: rgba(56, 189, 248, 0.18);
+        border-color: rgba(56, 189, 248, 0.35);
+        color: #fff;
+      }
+
+      .pet-pose-btn:active {
+        background: rgba(56, 189, 248, 0.28);
+      }
+
+      .pet-menu-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        margin: 2px 0;
+      }
+
+      .pet-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 5px #10b981;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pet-stage" id="pet-stage">
+      <!-- Speech Bubble -->
+      <div class="pet-bubble" id="pet-bubble">
+        <div class="pet-bubble-speaker" id="bubble-speaker">BEEPS</div>
+        <div class="pet-bubble-text" id="bubble-text">Hull solid and telemetry green. Ready when you are!</div>
+      </div>
+
+      <!-- Floor Presence Glow -->
+      <div class="pet-presence"></div>
+
+      <!-- Full Body Animated Actor (Seamless Normalized 1024x1536 Frames) -->
+      <div class="pet-actor-box" id="pet-actor" data-mode="idle" data-speaking="false">
+        <!-- Idle 2-Frame Cycle -->
+        <img class="pet-frame frame-idle-a" src="/assets/pet-frame-idle-a.png?v=13.0" alt="" draggable="false">
+        <img class="pet-frame frame-idle-b" src="/assets/pet-frame-idle-b.png?v=13.0" alt="" draggable="false">
+
+        <!-- Walk Left Cycle (4-Frame Alternating Stride & Passing) -->
+        <img class="pet-frame frame-walk-l-a" src="/assets/pet-frame-walk-l-a.png?v=13.0" alt="" draggable="false">
+        <img class="pet-frame frame-walk-l-c" src="/assets/pet-frame-walk-l-c.png?v=13.0" alt="" draggable="false">
+        <img class="pet-frame frame-walk-l-b" src="/assets/pet-frame-walk-l-b.png?v=13.0" alt="" draggable="false">
+        <img class="pet-frame frame-walk-l-d" src="/assets/pet-frame-walk-l-d.png?v=13.0" alt="" draggable="false">
+
+        <!-- Walk Right Cycle (4-Frame Alternating Stride & Passing) -->
+        <img class="pet-frame frame-walk-r-a" src="/assets/pet-frame-walk-r-a.png?v=13.0" alt="" draggable="false">
+        <img class="pet-frame frame-walk-r-c" src="/assets/pet-frame-walk-r-c.png?v=13.0" alt="" draggable="false">
+        <img class="pet-frame frame-walk-r-b" src="/assets/pet-frame-walk-r-b.png?v=13.0" alt="" draggable="false">
+        <img class="pet-frame frame-walk-r-d" src="/assets/pet-frame-walk-r-d.png?v=13.0" alt="" draggable="false">
+
+        <!-- Poses & Actions (All Full 2-Frame Dynamic Alternating Cycles) -->
+        <img class="pet-frame frame-coffee-a" src="/assets/pet-frame-coffee-a.png?v=12.0" alt="" draggable="false">
+        <img class="pet-frame frame-coffee-b" src="/assets/pet-frame-coffee-b.png?v=12.0" alt="" draggable="false">
+        <img class="pet-frame frame-thinking-a" src="/assets/pet-frame-thinking-a.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-thinking-b" src="/assets/pet-frame-thinking-b.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-cheer-a" src="/assets/pet-frame-cheer-a.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-cheer-b" src="/assets/pet-frame-cheer-b.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-dangle-a" src="/assets/pet-frame-dangle-a.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-dangle-b" src="/assets/pet-frame-dangle-b.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-wave-a" src="/assets/pet-frame-wave-a.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-wave-b" src="/assets/pet-frame-wave-b.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-sit-a" src="/assets/pet-frame-sit-a.png?v=12.0" alt="" draggable="false">
+        <img class="pet-frame frame-sit-b" src="/assets/pet-frame-sit-b.png?v=12.0" alt="" draggable="false">
+        <img class="pet-frame frame-game-a" src="/assets/pet-frame-game-a.png?v=12.0" alt="" draggable="false">
+        <img class="pet-frame frame-game-b" src="/assets/pet-frame-game-b.png?v=12.0" alt="" draggable="false">
+        <img class="pet-frame frame-sleep-a" src="/assets/pet-frame-sleep-a.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-sleep-b" src="/assets/pet-frame-sleep-b.png?v=2.2" alt="" draggable="false">
+        <img class="pet-frame frame-work-a" src="/assets/pet-frame-work-a.png?v=13.0" alt="" draggable="false">
+        <img class="pet-frame frame-work-b" src="/assets/pet-frame-work-b.png?v=13.0" alt="" draggable="false">
+      </div>
+
+      <!-- Compact Context Menu -->
+      <div class="pet-menu" id="pet-menu">
+        <button class="pet-menu-item" type="button" id="menu-open-app">
+          <span>🚀 Open Mission Control</span>
+          <span class="pet-status-dot"></span>
+        </button>
+
+        <div class="pet-menu-divider"></div>
+        <div class="pet-menu-header">Desktop Zones</div>
+        <div class="pet-zone-strip">
+          <button class="pet-zone-btn" type="button" id="menu-zone-apps" title="Patrol to VS Code & Terminal">
+            <span>💻 Apps</span>
+            <small style="color: #94a3b8; font-size: 8px;">Left</small>
+          </button>
+          <button class="pet-zone-btn" type="button" id="menu-zone-nebs" title="Hang out with Nebs">
+            <span>🐾 Nebs</span>
+            <small style="color: #c084fc; font-size: 8px;">Center</small>
+          </button>
+          <button class="pet-zone-btn" type="button" id="menu-zone-files" title="Inspect Desktop Vaults">
+            <span>📁 Files</span>
+            <small style="color: #94a3b8; font-size: 8px;">Right</small>
+          </button>
+        </div>
+
+        <div class="pet-menu-divider"></div>
+        <div class="pet-menu-header">Poses & Actions</div>
+        <div class="pet-poses-matrix">
+          <button class="pet-pose-btn" type="button" id="menu-pose-work" title="Retro computer terminal">
+            <span>💻 Work</span>
+          </button>
+          <button class="pet-pose-btn" type="button" id="menu-pose-coffee" title="Coffee break">
+            <span>☕ Coffee</span>
+          </button>
+          <button class="pet-pose-btn" type="button" id="menu-pose-wave" title="Wave hello">
+            <span>👋 Wave</span>
+          </button>
+          <button class="pet-pose-btn" type="button" id="menu-pose-sit" title="Sit on deck">
+            <span>🧘 Sit</span>
+          </button>
+          <button class="pet-pose-btn" type="button" id="menu-pose-game" title="Play handheld game">
+            <span>🎮 Game</span>
+          </button>
+          <button class="pet-pose-btn" type="button" id="menu-pose-sleep" title="Take a nap">
+            <span>💤 Sleep</span>
+          </button>
+          <button class="pet-pose-btn" type="button" id="menu-pose-cheer" title="Victory cheer">
+            <span>🎉 Cheer</span>
+          </button>
+          <button class="pet-pose-btn" type="button" id="menu-pose-thinking" title="Review flight logs">
+            <span>🧠 Think</span>
+          </button>
+          <button class="pet-pose-btn" type="button" id="menu-wander" title="Autonomous stroll">
+            <span>🚶 Wander</span>
+          </button>
+          <button class="pet-pose-btn" type="button" id="menu-pose-idle" title="Standby idle">
+            <span>🧍 Idle</span>
+          </button>
+        </div>
+
+        <div class="pet-menu-divider"></div>
+        <button class="pet-menu-item" type="button" id="menu-ping-companion">
+          <span>Check In (ADK Comms)</span>
+          <small style="color: var(--cyan); font-size: 9px;">Live</small>
+        </button>
+        <button class="pet-menu-item" type="button" id="menu-view-telemetry">
+          <span>Telemetry Status</span>
+          <small id="menu-tel-status" style="color: #34d399; font-size: 9px;">Active</small>
+        </button>
+
+        <div class="pet-menu-divider"></div>
+        <button class="pet-menu-item" type="button" id="menu-toggle-persist">
+          <span>Always on Top</span>
+          <b id="menu-persist-state" style="color: var(--cyan); font-size: 9.5px;">ON</b>
+        </button>
+        <button class="pet-menu-item" type="button" id="menu-toggle-voice">
+          <span>Voice Sound</span>
+          <b id="menu-voice-state" style="color: #94a3b8; font-size: 9.5px;">OFF</b>
+        </button>
+        <button class="pet-menu-item" type="button" id="menu-switch-voice" title="Click to cycle voice">
+          <span>Voice: <b id="menu-current-voice" style="color: var(--cyan); font-size: 9.5px;">Flo</b></span>
+          <small style="font-size: 8.5px; color: #94a3b8;">Cycle</small>
+        </button>
+        <button class="pet-menu-item" type="button" id="menu-close-pet" style="color: #f87171;">
+          <span>Hide Sprite</span>
+          <small style="font-size: 9.5px;">⌘P</small>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        const actor = document.getElementById("pet-actor");
+        const bubble = document.getElementById("pet-bubble");
+        const bubbleText = document.getElementById("bubble-text");
+        const menu = document.getElementById("pet-menu");
+        const voiceLabel = document.getElementById("menu-voice-state");
+
+        // Voice Sound is OFF by default as requested: visual talking only
+        let voiceEnabled = false;
+        let bubbleTimeout = null;
+        let bubbleTimer = null;
+        let speakingTimeout = null;
+
+        const greetings = [
+          "Standing by on desktop! Apps on the left, Nebs in center, files on the right.",
+          "What's good, Bee? Ship's humming and console ready.",
+          "Hull solid, telemetry green. Cruising the starfield with Nebs.",
+          "I'm locked in right here on desktop. What we building?",
+          "Radar clear, coffee warm. Ready when you are, cuz.",
+          "Sovereign systems purring like a kitten. Let's get shit done."
+        ];
+
+        // Clean speech text
+        function cleanSpeechText(text) {
+          if (!text) return "";
+          return text
+            .replace(/```[\s\S]*?```/g, "Code block omitted.")
+            .replace(/`([^`]+)`/g, "$1")
+            .replace(/https?:\/\/\S+/g, "link")
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+            .replace(/[*_~#>-]/g, "")
+            .replace(/[\u{1F300}-\u{1FAFF}]|[\u{2600}-\u{27BF}]/gu, "")
+            .trim();
+        }
+
+        // Natural Voice Candidates
+        const preferredVoicePatterns = ["Flo", "Shelley", "Sandy", "Moira", "Eddy", "Reed", "Daniel", "Tessa", "Ava"];
+        let selectedVoiceIndex = 0;
+        let voiceOptions = [];
+
+        function initVoiceOptions() {
+          if (!("speechSynthesis" in window)) return;
+          const allVoices = window.speechSynthesis.getVoices() || [];
+          if (!allVoices.length) return;
+
+          const ranked = [];
+          for (const pattern of preferredVoicePatterns) {
+            const found = allVoices.find(v => v.name.includes(pattern));
+            if (found && !ranked.includes(found)) ranked.push(found);
+          }
+          allVoices.forEach(v => {
+            if (v.lang.startsWith("en") && !/samantha|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|wobble|whisper|zarvox/i.test(v.name)) {
+              if (!ranked.includes(v)) ranked.push(v);
+            }
+          });
+
+          voiceOptions = ranked.length ? ranked : allVoices;
+
+          const saved = localStorage.getItem("beeps_voice_name");
+          if (saved) {
+            const idx = voiceOptions.findIndex(v => v.name === saved);
+            if (idx !== -1) selectedVoiceIndex = idx;
+          }
+
+          updateVoiceLabel();
+        }
+
+        function updateVoiceLabel() {
+          const current = voiceOptions[selectedVoiceIndex];
+          const voiceNameEl = document.getElementById("menu-current-voice");
+          if (current && voiceNameEl) {
+            const shortName = current.name.replace(/\s*\(.*\)/, "").trim();
+            voiceNameEl.textContent = shortName;
+          }
+        }
+
+        function cycleVoice() {
+          if (!voiceOptions.length) return;
+          selectedVoiceIndex = (selectedVoiceIndex + 1) % voiceOptions.length;
+          const newVoice = voiceOptions[selectedVoiceIndex];
+          localStorage.setItem("beeps_voice_name", newVoice.name);
+          updateVoiceLabel();
+          const shortName = newVoice.name.replace(/\s*\(.*\)/, "").trim();
+          say(`Voice set to ${shortName}.`);
+        }
+
+        initVoiceOptions();
+        if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+          window.speechSynthesis.onvoiceschanged = initVoiceOptions;
+        }
+
+        // Show bubble & trigger visual talking (sound only if voiceEnabled)
+        function say(text, duration = 3600) {
+          if (!text || (typeof text === "string" && !text.trim())) return;
+          bubbleText.textContent = text;
+          bubble.classList.add("visible");
+
+          if (bubbleTimer) clearTimeout(bubbleTimer);
+          if (bubbleTimeout) clearTimeout(bubbleTimeout);
+          bubbleTimer = bubbleTimeout = setTimeout(() => {
+            bubble.classList.remove("visible");
+          }, duration);
+
+          // Visual talking bounce
+          actor.dataset.speaking = "true";
+          if (speakingTimeout) clearTimeout(speakingTimeout);
+          speakingTimeout = setTimeout(() => {
+            actor.dataset.speaking = "false";
+          }, Math.min(duration, 2800));
+
+          // TTS Speech (strictly when voice sound enabled)
+          if (voiceEnabled && "speechSynthesis" in window) {
+            try {
+              window.speechSynthesis.cancel();
+              const clean = cleanSpeechText(text);
+              if (clean) {
+                const utterance = new SpeechSynthesisUtterance(clean);
+                if (voiceOptions.length && voiceOptions[selectedVoiceIndex]) {
+                  utterance.voice = voiceOptions[selectedVoiceIndex];
+                }
+                utterance.rate = 1.05;
+                utterance.pitch = 1.1;
+                window.speechSynthesis.speak(utterance);
+              }
+            } catch (e) {
+              console.warn("TTS failed:", e);
+            }
+          }
+        }
+        window.say = say;
+
+        function sendHostIPC(action, payload = {}) {
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            try {
+              window.webkit.messageHandlers.beepsHost.postMessage({ action, ...payload });
+            } catch (_) {}
+          }
+        }
+
+        const VALID_MODES = new Set([
+          "idle", "work", "thinking", "cheer", "wave",
+          "coffee", "sit", "game", "sleep", "dangle",
+          "walk-left", "walk-right"
+        ]);
+
+        // Global API for Swift & UI
+        window.setPetMode = function(mode, text) {
+          const safeMode = VALID_MODES.has(mode) ? mode : "idle";
+          actor.dataset.mode = safeMode;
+          if (safeMode === "work" || safeMode === "thinking") {
+            sendHostIPC("stopWander", { lockAutonomy: true });
+          } else if (safeMode === "idle") {
+            sendHostIPC("resumeAutonomy");
+          }
+          if (text) {
+            say(text, 3600);
+          }
+        };
+
+        // Host Communication
+        function openChat() {
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "openChat" });
+          } else {
+            window.open("http://127.0.0.1:4173/local/", "_blank");
+          }
+        }
+
+        function hidePet() {
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "hidePet" });
+          } else {
+            window.close();
+          }
+        }
+
+        // Smooth Desktop Dragging & Dangle Physics Handling
+        let clickTimer = null;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let lastScreenX = 0;
+        let lastScreenY = 0;
+        let dragTilt = 0;
+        let dragSpeechTimeout = null;
+
+        const presence = document.querySelector(".pet-presence");
+
+        window.addEventListener("mousedown", (e) => {
+          if (e.button !== 0) return;
+          if (e.target.closest("#pet-menu")) return;
+          if (!e.target.closest("#pet-actor")) return;
+          isDragging = false;
+          dragStartX = e.screenX;
+          dragStartY = e.screenY;
+          lastScreenX = e.screenX;
+          lastScreenY = e.screenY;
+          dragTilt = 0;
+        });
+
+        window.addEventListener("mousemove", (e) => {
+          if (e.buttons !== 1) return;
+          const dx = e.screenX - lastScreenX;
+          const dy = -(e.screenY - lastScreenY);
+          lastScreenX = e.screenX;
+          lastScreenY = e.screenY;
+
+          const dist = Math.hypot(e.screenX - dragStartX, e.screenY - dragStartY);
+          if (dist > 3) {
+            if (!isDragging) {
+              isDragging = true;
+              actor.dataset.dragging = "true";
+              if (presence) {
+                presence.style.transform = "scale(0.55)";
+                presence.style.opacity = "0.25";
+              }
+              if (clickTimer) {
+                clearTimeout(clickTimer);
+                clickTimer = null;
+              }
+              // Cute aloft reaction when picked up
+              clearTimeout(dragSpeechTimeout);
+              dragSpeechTimeout = setTimeout(() => {
+                if (isDragging) {
+                  const dangleLines = [
+                    "Wheee! Air transport!",
+                    "Whoa, airborne!",
+                    "Relocating station!",
+                    "Aloft and surveying!",
+                    "Carrying Beeps!"
+                  ];
+                  say(dangleLines[Math.floor(Math.random() * dangleLines.length)], 2400);
+                }
+              }, 220);
+            }
+
+            // Smooth dynamic inertia tilt from horizontal velocity
+            let targetTilt = Math.max(-22, Math.min(22, -dx * 2.4));
+            dragTilt += (targetTilt - dragTilt) * 0.35;
+            actor.style.setProperty("--drag-tilt", `${dragTilt.toFixed(1)}deg`);
+
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+              window.webkit.messageHandlers.beepsHost.postMessage({
+                action: "dragWindow",
+                deltaX: dx,
+                deltaY: dy
+              });
+            }
+          }
+        });
+
+        window.addEventListener("mouseup", (e) => {
+          if (e.button !== 0) return;
+          clearTimeout(dragSpeechTimeout);
+          if (isDragging) {
+            actor.dataset.dragging = "false";
+            actor.style.removeProperty("--drag-tilt");
+            if (presence) {
+              presence.style.transform = "";
+              presence.style.opacity = "";
+            }
+
+            // Play tactile landing squash
+            actor.classList.remove("landing");
+            void actor.offsetWidth;
+            actor.classList.add("landing");
+            setTimeout(() => {
+              actor.classList.remove("landing");
+            }, 380);
+
+            setTimeout(() => {
+              isDragging = false;
+              if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost && actor.dataset.mode === "idle") {
+                window.webkit.messageHandlers.beepsHost.postMessage({ action: "resumeAutonomy" });
+              }
+            }, 100);
+          }
+        });
+
+        function doHop() {
+          actor.classList.remove("hop");
+          void actor.offsetWidth;
+          actor.classList.add("hop");
+          window.setPetMode("wave");
+          const line = greetings[Math.floor(Math.random() * greetings.length)];
+          say(line, 3500);
+          setTimeout(() => {
+            if (actor.dataset.mode === "wave") {
+              window.setPetMode("idle");
+              if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+                window.webkit.messageHandlers.beepsHost.postMessage({ action: "resumeAutonomy" });
+              }
+            }
+          }, 3000);
+        }
+
+        // Single click: hop & wave hello. Double click: open chat app
+        actor.addEventListener("click", (e) => {
+          if (isDragging) return;
+          e.stopPropagation();
+
+          // Wake up if sleeping
+          if (actor.dataset.mode === "sleep") {
+            window.setPetMode("idle", "Systems back online!");
+            return;
+          }
+
+          // Stop any active wander when clicked
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+
+          if (clickTimer) {
+            clearTimeout(clickTimer);
+            clickTimer = null;
+            openChat();
+          } else {
+            clickTimer = setTimeout(() => {
+              clickTimer = null;
+              doHop();
+            }, 260);
+          }
+        });
+
+        actor.addEventListener("dblclick", (e) => {
+          e.stopPropagation();
+          if (clickTimer) {
+            clearTimeout(clickTimer);
+            clickTimer = null;
+          }
+          openChat();
+        });
+
+        // Right-Click Context Menu with safe dynamic viewport clamping
+        window.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          menu.style.visibility = "hidden";
+          menu.classList.add("visible");
+
+          const pad = 6;
+          const menuW = menu.offsetWidth || 196;
+          const menuH = menu.offsetHeight || 320;
+          const maxLeft = Math.max(pad, window.innerWidth - menuW - pad);
+          const maxTop = Math.max(pad, window.innerHeight - menuH - pad);
+          const left = Math.max(pad, Math.min(e.clientX - 10, maxLeft));
+          const top = Math.max(pad, Math.min(e.clientY - 10, maxTop));
+
+          menu.style.left = `${left}px`;
+          menu.style.top = `${top}px`;
+          menu.style.visibility = "visible";
+        });
+
+        window.addEventListener("click", (e) => {
+          if (!menu.contains(e.target)) {
+            menu.classList.remove("visible");
+          }
+        });
+
+        // Menu Actions
+        document.getElementById("menu-open-app").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          openChat();
+        });
+
+        // Desktop Spatial Navigation
+        function sendMoveToZone(zone) {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "moveToZone", zone: zone });
+          } else {
+            if (zone === "apps") {
+              say("Heading over to check the apps on the left...", 2500);
+              window.setPetMode("walk-left");
+              setTimeout(() => window.setPetMode("work", "Monitoring apps on the left: VS Code & Terminal!"), 2500);
+            } else if (zone === "nebs") {
+              say("Going to hang out with Nebs in the center! 🐾", 2500);
+              window.setPetMode("walk-right");
+              setTimeout(() => window.setPetMode("coffee", "Coffee break with Nebs in the nebula. ☕🐾"), 2500);
+            } else if (zone === "files") {
+              say("Walking over to inspect the desktop files on the right...", 2500);
+              window.setPetMode("walk-right");
+              setTimeout(() => window.setPetMode("thinking", "Reviewing files on the right: Root Work, Recovery, School, and Home."), 2500);
+            }
+          }
+        }
+
+        const btnApps = document.getElementById("menu-zone-apps");
+        if (btnApps) btnApps.addEventListener("click", () => sendMoveToZone("apps"));
+        const btnNebs = document.getElementById("menu-zone-nebs");
+        if (btnNebs) btnNebs.addEventListener("click", () => sendMoveToZone("nebs"));
+        const btnFiles = document.getElementById("menu-zone-files");
+        if (btnFiles) btnFiles.addEventListener("click", () => sendMoveToZone("files"));
+
+        document.getElementById("menu-switch-voice").addEventListener("click", () => {
+          cycleVoice();
+        });
+
+        document.getElementById("menu-wander").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          say("Stretching legs! Going for a patrol.", 2500);
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "forceWander" });
+          }
+        });
+
+        document.getElementById("menu-pose-idle").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+          window.setPetMode("idle");
+        });
+
+        document.getElementById("menu-pose-work").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+          window.setPetMode("work", "Reviewing mission telemetry and typing logs...");
+        });
+
+        document.getElementById("menu-pose-coffee").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+          window.setPetMode("coffee", "Fueling up on espresso. Carry on!");
+        });
+
+        document.getElementById("menu-pose-wave").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+          window.setPetMode("wave", "Hey there! Ready when you are.");
+        });
+
+        document.getElementById("menu-pose-sit").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+          window.setPetMode("sit", "Taking a breather on the deck.");
+        });
+
+        document.getElementById("menu-pose-game").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+          window.setPetMode("game", "Taking a gaming break on the beanbag! 👾");
+        });
+
+        document.getElementById("menu-pose-sleep").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+          window.setPetMode("sleep", "Entering low-power sleep mode... Zzz.");
+        });
+
+        document.getElementById("menu-pose-cheer").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+          window.setPetMode("cheer", "Mission accomplished! Hull solid!");
+        });
+
+        document.getElementById("menu-pose-thinking").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+            window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+          }
+          window.setPetMode("thinking", "Reviewing flight logs...");
+        });
+
+        async function safeFetch(url, options) {
+          try {
+            return await fetch(url, options);
+          } catch (err) {
+            return null;
+          }
+        }
+
+        let isQueryingCompanion = false;
+        async function queryCompanion(message = "Yo Beeps, quick check-in. What's on deck?") {
+          if (isQueryingCompanion) return;
+          isQueryingCompanion = true;
+          window.setPetMode("thinking", "Checking comms with companion...");
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const res = await safeFetch("http://127.0.0.1:5000/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message }),
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (!res || !res.ok) throw new Error(res ? "Status " + res.status : "Network failure on port 5000");
+            const data = await res.json();
+            const reply = (data && data.response) ? data.response.trim() : "Comms check green!";
+            window.setPetMode("wave");
+            say(reply, 5000);
+            setTimeout(() => {
+              if (actor.dataset.mode === "wave") window.setPetMode("idle");
+            }, 5000);
+          } catch (err) {
+            // Port 5000 fallback to Navigator port 4173 /api/ask
+            try {
+              const res4173 = await safeFetch("http://127.0.0.1:4173/api/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: message, mode: "model" })
+              });
+              if (!res4173 || !res4173.ok) throw new Error(res4173 ? "Port 4173 status " + res4173.status : "Port 4173 offline");
+              const data4173 = await res4173.json();
+              const reply4173 = (data4173 && (data4173.answer || data4173.response || data4173.text))
+                ? (data4173.answer || data4173.response || data4173.text).trim()
+                : "Mission logs online. Standing by for instructions.";
+              window.setPetMode("idle");
+              say(reply4173, 5000);
+            } catch (fallbackErr) {
+              window.setPetMode("idle");
+              say("Couldn't reach companion daemon on port 5000 or 4173.", 4000);
+            }
+          } finally {
+            isQueryingCompanion = false;
+          }
+        }
+        window.queryCompanion = queryCompanion;
+
+        const pingBtn = document.getElementById("menu-ping-companion");
+        if (pingBtn) {
+          pingBtn.addEventListener("click", () => {
+            menu.classList.remove("visible");
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+              window.webkit.messageHandlers.beepsHost.postMessage({ action: "stopWander" });
+            }
+            queryCompanion("Yo Beeps, quick check-in. How you doing and what's on deck?");
+          });
+        }
+        const telBtn = document.getElementById("menu-view-telemetry");
+        if (telBtn) {
+          telBtn.addEventListener("click", async () => {
+            menu.classList.remove("visible");
+            try {
+              const res = await fetch("http://127.0.0.1:4173/api/local/telemetry?limit=3");
+              if (!res.ok) throw new Error("Status " + res.status);
+              const data = await res.json();
+              const latest = data.latest;
+              if (latest) {
+                say(`Telemetry [${latest.action}]: ${latest.details || latest.target || "Active"}`, 4500);
+              } else {
+                say("Telemetry live. No recent errors.", 3000);
+              }
+            } catch (err) {
+              say("Telemetry offline or port 4173 unreachable.", 3500);
+            }
+          });
+        }
+
+        document.getElementById("menu-toggle-voice").addEventListener("click", () => {
+          voiceEnabled = !voiceEnabled;
+          voiceLabel.textContent = voiceEnabled ? "ON" : "OFF";
+          voiceLabel.style.color = voiceEnabled ? "var(--cyan)" : "#94a3b8";
+          menu.classList.remove("visible");
+          if (!voiceEnabled && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+          }
+          say(voiceEnabled ? "Voice sound enabled." : "Voice sound muted. Visual talking active.", 2500);
+        });
+
+        let persistEnabled = true;
+        const persistStateLabel = document.getElementById("menu-persist-state");
+        window.setAlwaysOnTopState = function(state) {
+          persistEnabled = !!state;
+          if (persistStateLabel) {
+            persistStateLabel.textContent = persistEnabled ? "ON" : "OFF";
+            persistStateLabel.style.color = persistEnabled ? "var(--cyan)" : "#94a3b8";
+          }
+        };
+
+        const persistBtn = document.getElementById("menu-toggle-persist");
+        if (persistBtn) {
+          persistBtn.addEventListener("click", () => {
+            menu.classList.remove("visible");
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+              window.webkit.messageHandlers.beepsHost.postMessage({ action: "toggleAlwaysOnTop" });
+            } else {
+              persistEnabled = !persistEnabled;
+              window.setAlwaysOnTopState(persistEnabled);
+              say(persistEnabled ? "Always on top enabled." : "Always on top disabled.", 2200);
+            }
+          });
+        }
+
+        document.getElementById("menu-close-pet").addEventListener("click", () => {
+          menu.classList.remove("visible");
+          hidePet();
+        });
+
+        // Pose State Machine: thinking -> work -> cheer -> idle
+        let cheerTimer = null;
+
+        function handleBeepsActionEvent(type, data = {}) {
+          if (!type) return;
+
+          if (type === "queued" || type === "routed" || type === "generating" || type === "thinking") {
+            if (cheerTimer) {
+              clearTimeout(cheerTimer);
+              cheerTimer = null;
+            }
+            window.setPetMode("thinking");
+          } else if (type === "tool" || type === "work") {
+            if (cheerTimer) {
+              clearTimeout(cheerTimer);
+              cheerTimer = null;
+            }
+            window.setPetMode("work");
+            // NEW: Display task_detail for tool events
+            if (type === "tool" && data.task_detail) {
+              say(data.task_detail, 10000); // Display for 10 seconds
+            }
+          } else if (type === "done" || type === "cheer") {
+            if (cheerTimer) {
+              clearTimeout(cheerTimer);
+              cheerTimer = null;
+            }
+            let summary = data.summary || data.text || data.label || "Response complete.";
+            summary = summary.replace(/[#*`_~]/g, "").trim();
+            if (summary.length > 100) summary = summary.slice(0, 97) + "...";
+            window.setPetMode("cheer", summary);
+
+            cheerTimer = setTimeout(() => {
+              if (actor.dataset.mode === "cheer") {
+                window.setPetMode("idle");
+              }
+              cheerTimer = null;
+            }, 10000); // Changed from 4500 to 10000 for consistency
+          } else if (type === "idle") {
+            if (cheerTimer) {
+              clearTimeout(cheerTimer);
+              cheerTimer = null;
+            }
+            window.setPetMode("idle", data.text || data.label);
+          } else if (type === "wave") {
+            window.setPetMode("wave", data.text || data.label);
+          }
+        }
+        window.handleBeepsActionEvent = handleBeepsActionEvent;
+
+        // Action stream subscription over SSE with exponential backoff
+        let sseConnection = null;
+        let sseRetryDelay = 1000;
+        const SSE_MAX_DELAY = 30000;
+
+        function connectActionStream() {
+          if (typeof EventSource === "undefined") return;
+          if (sseConnection) {
+            try { sseConnection.close(); } catch (_) {}
+            sseConnection = null;
+          }
+
+          const sseOrigin = (window.location && window.location.origin && window.location.origin.startsWith("http"))
+            ? ""
+            : "http://127.0.0.1:4173";
+          const streamUrl = `${sseOrigin}/api/local/conversations/stream`;
+
+          try {
+            sseConnection = new EventSource(streamUrl);
+
+            sseConnection.onopen = () => {
+              sseRetryDelay = 1000;
+            };
+
+            const parsePayload = (e) => {
+              try {
+                return JSON.parse(e.data);
+              } catch (_) {
+                return { label: e.data };
+              }
+            };
+
+            sseConnection.addEventListener("queued", (e) => {
+              handleBeepsActionEvent("queued", parsePayload(e));
+            });
+            sseConnection.addEventListener("routed", (e) => {
+              handleBeepsActionEvent("routed", parsePayload(e));
+            });
+            sseConnection.addEventListener("generating", (e) => {
+              handleBeepsActionEvent("generating", parsePayload(e));
+            });
+            sseConnection.addEventListener("tool", (e) => {
+              handleBeepsActionEvent("tool", parsePayload(e));
+            });
+            sseConnection.addEventListener("done", (e) => {
+              handleBeepsActionEvent("done", parsePayload(e));
+            });
+
+            sseConnection.onmessage = (e) => {
+              const data = parsePayload(e);
+              if (data && data.type) {
+                handleBeepsActionEvent(data.type, data);
+              }
+            };
+
+            sseConnection.onerror = () => {
+              if (sseConnection) {
+                try { sseConnection.close(); } catch (_) {}
+                sseConnection = null;
+              }
+              const delay = sseRetryDelay;
+              sseRetryDelay = Math.min(sseRetryDelay * 2, SSE_MAX_DELAY);
+              setTimeout(connectActionStream, delay);
+            };
+          } catch (err) {
+            const delay = sseRetryDelay;
+            sseRetryDelay = Math.min(sseRetryDelay * 2, SSE_MAX_DELAY);
+            setTimeout(connectActionStream, delay);
+          }
+        }
+
+        connectActionStream();
+
+        // BroadcastChannel to sync speech with Beeps Local
+        if ("BroadcastChannel" in window) {
+          const channel = new BroadcastChannel("beeps_sync");
+          channel.onmessage = (event) => {
+            if (!event.data) return;
+            if (event.data.type === "beeps_speech") {
+              say(event.data.text);
+            } else if (event.data.type === "beeps_action") {
+              handleBeepsActionEvent(event.data.action, event.data);
+            }
+          };
+        }
+
+        // Initial welcome speech on launch (silent bubble by default)
+        setTimeout(() => {
+          say("Standing by on desktop!", 3000);
+        }, 500);
+      })();
+    </script>
+  </body>
+</html>
