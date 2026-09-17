@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Purge Console</title>
+    <style>
+        body { margin: 0; padding: 0; background: #0a0a12; color: #fff; font-family: 'Menlo', monospace; display: flex; height: 100vh; overflow: hidden; }
+        #sidebar { width: 400px; background: #11111a; border-right: 1px solid #333; display: flex; flex-direction: column; }
+        
+        .tabs { display: flex; background: #1a1a2e; border-bottom: 2px solid #555; }
+        .tab { flex: 1; padding: 15px 10px; text-align: center; cursor: pointer; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+        .tab.active { color: #0df; background: #222; border-bottom: 2px solid #0df; }
+        
+        .filter-box { padding: 10px; border-bottom: 1px solid #444; }
+        input[type="text"] { width: 90%; padding: 8px; background: #000; border: 1px solid #0df; color: #0df; font-family: inherit; }
+        
+        .asset-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; margin-bottom: 5px; background: #222; border: 1px solid #333; font-size: 11px; word-break: break-all; transition: 0.2s; }
+        .asset-item:hover, .asset-item.active { background: #002233; color: #fff; border-color: #0df; }
+        .asset-item span { cursor: pointer; flex-grow: 1; }
+        
+        .mark-btn { background: #440000; border: 1px solid #ff4444; color: #ff8888; padding: 4px 8px; cursor: pointer; font-size: 10px; margin-left: 10px; }
+        .mark-btn:hover { background: #ff0000; color: #fff; }
+        .unmark-btn { background: #222; border: 1px solid #888; color: #ccc; padding: 4px 8px; cursor: pointer; font-size: 10px; margin-left: 10px; }
+        
+        #purge-section { padding: 20px; background: #220000; border-top: 2px solid #ff0000; text-align: center; display: none; }
+        #purge-btn { background: #ff0000; color: #fff; font-weight: bold; border: 2px solid #fff; padding: 12px 20px; cursor: pointer; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 10px #ff0000; }
+        #purge-btn:hover { background: #cc0000; }
+        
+        #main-stage { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
+        .toolbar { padding: 10px; background: #11111a; border-bottom: 1px solid #333; display: flex; gap: 10px; align-items: center; }
+        select, button { padding: 6px 12px; background: #222; border: 1px solid #555; color: #fff; cursor: pointer; font-family: inherit; }
+        button:hover { background: #444; }
+        
+        #canvas-container { flex-grow: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #000; }
+        #canvas-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; transition: opacity 0.3s; }
+        #sprite-viewer { position: relative; z-index: 10; max-width: 90%; max-height: 90%; filter: drop-shadow(0 0 10px rgba(0, 221, 255, 0.5)); }
+        
+        #hud-overlay { position: absolute; bottom: 20px; left: 20px; right: 20px; background: rgba(0,0,0,0.8); border: 1px solid #0df; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .hud-info { font-size: 13px; color: #aaa; }
+        .hud-filename { font-size: 18px; color: #fff; font-weight: bold; margin-bottom: 5px; }
+        
+        .hazard-bg { background: repeating-linear-gradient(45deg, #220000, #220000 10px, #440000 10px, #440000 20px); }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <div class="tabs">
+            <div class="tab active" id="tab-database" onclick="switchTab('database')">Database</div>
+            <div class="tab" id="tab-queue" onclick="switchTab('queue')" style="color: #ff4444;">Purge Queue (0)</div>
+        </div>
+        
+        <!-- Database View -->
+        <div id="view-database" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+            <div class="filter-box"><input type="text" id="filter" placeholder="Search sprites..." onkeyup="renderDatabase()"></div>
+            <div class="asset-list" id="list-database"></div>
+        </div>
+        
+        <!-- Purge Queue View -->
+        <div id="view-queue" class="hazard-bg" style="display: none; flex-direction: column; flex-grow: 1; overflow: hidden;">
+            <div class="asset-list" id="list-queue"></div>
+            <div id="purge-section">
+                <button id="purge-btn" onclick="executePurge()">EXECUTE PURGE</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="main-stage">
+        <div class="toolbar">
+            <label>Background:</label>
+            <select id="bg-selector" onchange="updateBg()">
+                <option value="none">None (Black)</option>
+                <option value="assets/background-command-deck-b.png">Command Deck</option>
+                <option value="assets/background-creative-lab-b.png">Creative Lab</option>
+                <option value="assets/background-learning-observatory-b.png">Learning Observatory</option>
+                <option value="assets/background-memory-core-b.png">Memory Core</option>
+                <option value="assets/background-operations-engine-b.png">Operations Engine</option>
+            </select>
+            <label style="margin-left: 20px;">Scale:</label>
+            <input type="range" id="scale-slider" min="0.1" max="2" step="0.1" value="1" oninput="updateScale()">
+        </div>
+        <div id="canvas-container">
+            <img id="canvas-bg" src="" style="display:none;">
+            <img id="sprite-viewer" src="">
+        </div>
+        <div id="hud-overlay">
+            <div>
+                <div class="hud-filename" id="hud-name">Select a Sprite</div>
+                <div class="hud-info" id="hud-path">Path: N/A</div>
+            </div>
+            <div>
+                <button onclick="copyToClipboard()" style="margin-right: 10px;">Copy Filename</button>
+                <button id="hud-mark-btn" onclick="toggleCurrentMark()" style="background: #440000; border-color: #ff0000; color: white;">Mark for Deletion</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sprites = [];
+        let purgeQueue = new Set();
+        let currentSprite = '';
+        
+        async function fetchSprites() {
+            try {
+                const res = await fetch('http://localhost:8181/api/sprites', { cache: 'no-store' });
+                sprites = await res.json();
+                sprites.sort();
+                renderDatabase();
+                
+                if (sprites.length > 0) {
+                    setTimeout(() => {
+                        const firstItem = document.querySelector('.asset-item span');
+                        if (firstItem) firstItem.click();
+                    }, 100);
+                }
+            } catch(e) {
+                console.error("Failed to fetch sprites", e);
+            }
+        }        
+        const listDb = document.getElementById('list-database');
+        const listQueue = document.getElementById('list-queue');
+        const viewer = document.getElementById('sprite-viewer');
+        const hudName = document.getElementById('hud-name');
+        const hudPath = document.getElementById('hud-path');
+        const hudMarkBtn = document.getElementById('hud-mark-btn');
+        const tabQueue = document.getElementById('tab-queue');
+        
+        function switchTab(tab) {
+            document.getElementById('tab-database').classList.remove('active');
+            document.getElementById('tab-queue').classList.remove('active');
+            document.getElementById('view-database').style.display = 'none';
+            document.getElementById('view-queue').style.display = 'none';
+            
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('view-' + tab).style.display = 'flex';
+            
+            if(tab === 'queue') renderQueue();
+        }
+        
+        function renderDatabase() {
+            const term = document.getElementById('filter').value.toLowerCase();
+            listDb.innerHTML = '';
+            
+            sprites.filter(s => s.toLowerCase().includes(term)).sort().forEach(s => {
+                // Skip if it's already in the purge queue
+                if (purgeQueue.has(s)) return;
+                
+                const div = document.createElement('div');
+                div.className = 'asset-item' + (s === currentSprite ? ' active' : '');
+                
+                const span = document.createElement('span');
+                span.textContent = s;
+                span.onclick = () => selectSprite(s, div);
+                
+                const btn = document.createElement('button');
+                btn.className = 'mark-btn';
+                btn.textContent = 'MARK ✖';
+                btn.onclick = (e) => { e.stopPropagation(); markForDeletion(s); };
+                
+                div.appendChild(span);
+                div.appendChild(btn);
+                listDb.appendChild(div);
+            });
+        }
+        
+        function renderQueue() {
+            listQueue.innerHTML = '';
+            const pSection = document.getElementById('purge-section');
+            
+            if(purgeQueue.size === 0) {
+                pSection.style.display = 'none';
+                listQueue.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">Queue is empty.</div>';
+                return;
+            }
+            
+            pSection.style.display = 'block';
+            
+            Array.from(purgeQueue).sort().forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'asset-item' + (s === currentSprite ? ' active' : '');
+                div.style.borderColor = '#ff4444';
+                
+                const span = document.createElement('span');
+                span.textContent = s;
+                span.onclick = () => selectSprite(s, div);
+                
+                const btn = document.createElement('button');
+                btn.className = 'unmark-btn';
+                btn.textContent = 'UNMARK';
+                btn.onclick = (e) => { e.stopPropagation(); unmarkForDeletion(s); };
+                
+                div.appendChild(span);
+                div.appendChild(btn);
+                listQueue.appendChild(div);
+            });
+        }
+        
+        function selectSprite(s, element) {
+            currentSprite = s;
+            viewer.src = 'assets/' + s;
+            hudName.textContent = s;
+            hudPath.textContent = 'public/assets/' + s;
+            
+            document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('active'));
+            if(element) element.classList.add('active');
+            
+            if(purgeQueue.has(s)) {
+                hudMarkBtn.textContent = 'Unmark';
+                hudMarkBtn.style.background = '#222';
+                hudMarkBtn.style.borderColor = '#888';
+            } else {
+                hudMarkBtn.textContent = 'Mark for Deletion';
+                hudMarkBtn.style.background = '#440000';
+                hudMarkBtn.style.borderColor = '#ff0000';
+            }
+        }
+        
+        function toggleCurrentMark() {
+            if(!currentSprite) return;
+            if(purgeQueue.has(currentSprite)) {
+                unmarkForDeletion(currentSprite);
+            } else {
+                markForDeletion(currentSprite);
+            }
+        }
+        
+        function markForDeletion(s) {
+            purgeQueue.add(s);
+            updateQueueCount();
+            renderDatabase();
+            if(document.getElementById('tab-queue').classList.contains('active')) renderQueue();
+            if(s === currentSprite) selectSprite(s, null);
+        }
+        
+        function unmarkForDeletion(s) {
+            purgeQueue.delete(s);
+            updateQueueCount();
+            if(document.getElementById('tab-database').classList.contains('active')) renderDatabase();
+            if(document.getElementById('tab-queue').classList.contains('active')) renderQueue();
+            if(s === currentSprite) selectSprite(s, null);
+        }
+        
+        function updateQueueCount() {
+            tabQueue.textContent = 'Purge Queue (' + purgeQueue.size + ')';
+        }
+        
+        async function executePurge() {
+            const filesToDelete = Array.from(purgeQueue);
+            if(filesToDelete.length === 0) return;
+            
+            const confirmed = confirm('DANGER: You are about to permanently wipe ' + filesToDelete.length + ' sprites from the disk. Alloy made a backup just in case, but proceed with caution. Execute Purge?');
+            if(!confirmed) return;
+            
+            try {
+                const res = await fetch('http://localhost:8181/api/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: filesToDelete })
+                });
+                
+                const data = await res.json();
+                
+                if(data.success) {
+                    alert(data.message);
+                    // Remove from active array and purge queue
+                    sprites = sprites.filter(s => !purgeQueue.has(s));
+                    purgeQueue.clear();
+                    
+                    updateQueueCount();
+                    switchTab('database');
+                    renderDatabase();
+                    
+                    viewer.src = '';
+                    hudName.textContent = 'Purge Complete';
+                    hudMarkBtn.style.display = 'none';
+                } else {
+                    alert('Error during purge. Check console.');
+                    console.error(data.errors);
+                }
+            } catch(err) {
+                alert('Connection to Purge API failed. Is Nebula running the backend on port 8181?');
+            }
+        }
+        
+        function updateBg() {
+            const bg = document.getElementById('bg-selector').value;
+            const bgImg = document.getElementById('canvas-bg');
+            if(bg === 'none') {
+                bgImg.style.display = 'none';
+            } else {
+                bgImg.style.display = 'block';
+                bgImg.src = bg;
+            }
+        }
+        
+        function updateScale() {
+            viewer.style.transform = 'scale(' + document.getElementById('scale-slider').value + ')';
+        }
+        
+        function copyToClipboard() {
+            if(currentSprite) navigator.clipboard.writeText(currentSprite);
+        }
+        
+        fetchSprites();
+        
+        // Auto-select the first sprite on load so the stage isn't empty
+        if (sprites.length > 0) {
+            // Find the element that was created
+            setTimeout(() => {
+                const firstItem = document.querySelector('.asset-item span');
+                if (firstItem) firstItem.click();
+            }, 100);
+        }
+    </script>
+</body>
+</html>
