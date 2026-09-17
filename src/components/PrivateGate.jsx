@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { PublicHome, PrivacyPolicy, TermsOfService } from "./PublicSite";
 
 const SESSION_KEY = "bmc-private-bridge";
 

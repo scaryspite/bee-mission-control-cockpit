@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import "./CrewActors.css";
 import beepsSDK from "../sdk/BeepsSDK";
 
@@ -15,22 +15,25 @@ function CrewMember({ config, isWorking }) {
   const bubbleTimer = useRef(null);
   const workTimer = useRef(null);
 
-  // Set work mode based on telemetry prop
   useEffect(() => {
+    let timer;
     if (isWorking) {
-      // Interrupt any current action
       window.clearTimeout(wanderTimer.current);
       window.clearTimeout(walkTimer.current);
       window.clearTimeout(bubbleTimer.current);
-      setBubbleText("");
-      setMode("work");
+      timer = window.setTimeout(() => {
+        setBubbleText("");
+        setMode("work");
+      }, 0);
     } else {
-      // If we were working, revert to idle
-      if (mode === "work") {
-        setMode("idle");
-      }
+      timer = window.setTimeout(() => {
+        setMode((prevMode) => (prevMode === "work" ? "idle" : prevMode));
+      }, 0);
     }
-  }, [isWorking, mode]);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [isWorking]);
 
 
   // Autonomous wandering patrol cycle within dedicated bounds
@@ -105,7 +108,7 @@ function CrewMember({ config, isWorking }) {
 
 
 
-  const framesList = React.useMemo(() => {
+  const framesList = useMemo(() => {
     const list = [];
     const f = config.frames;
     if (typeof f.idle === 'string') list.push({ id: 'idle-a', src: f.idle });
@@ -177,8 +180,8 @@ function CrewMember({ config, isWorking }) {
 export default function CrewActors() {
   const [crewStatus, setCrewStatus] = useState({
     alloy: false,
-    nebs: false,
-    doublestuff: false,
+    nebula: false,
+    doublestuffiana: false,
     rivet: false,
     beeps: false,
   });
@@ -188,8 +191,8 @@ export default function CrewActors() {
     const handleStatusDispatch = (payload) => {
       const { crew_member, task } = payload;
       let memberKey = (crew_member || "").toLowerCase().trim();
-      if (memberKey === "nebula" || memberKey === "nebs") memberKey = "nebs";
-      if (memberKey === "oreo" || memberKey === "doublestuffiana" || memberKey === "doublestuff") memberKey = "doublestuff";
+      if (memberKey === "nebula" || memberKey === "nebs") memberKey = "nebula";
+      if (memberKey === "oreo" || memberKey === "doublestuffiana" || memberKey === "doublestuff") memberKey = "doublestuffiana";
 
       setCrewStatus(prev => {
         if (memberKey in prev) {
@@ -217,8 +220,8 @@ export default function CrewActors() {
   return (
     <div className="crew-actors-layer" aria-label="Active Crew Stations">
       <CrewMember config={CREW_CONFIG.alloy} isWorking={crewStatus.alloy} />
-      <CrewMember config={CREW_CONFIG.nebs} isWorking={crewStatus.nebs} />
-      <CrewMember config={CREW_CONFIG.doublestuff} isWorking={crewStatus.doublestuff} />
+      <CrewMember config={CREW_CONFIG.nebula} isWorking={crewStatus.nebula} />
+      <CrewMember config={CREW_CONFIG.doublestuffiana} isWorking={crewStatus.doublestuffiana} />
       <CrewMember config={CREW_CONFIG.rivet} isWorking={crewStatus.rivet} />
       <CrewMember config={CREW_CONFIG.beeps} isWorking={crewStatus.beeps} />
     </div>

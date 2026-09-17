@@ -105,11 +105,19 @@
 .crew-actor-unit[data-mode="walk"][data-facing="left"] .crew-actor-sprite[data-frame-id="walk-l-c"] { animation: frame-show-4 0.6s infinite step-end 0.3s; }
 .crew-actor-unit[data-mode="walk"][data-facing="left"] .crew-actor-sprite[data-frame-id="walk-l-d"] { animation: frame-show-4 0.6s infinite step-end 0.45s; }
 
+/* 2-Frame Walk Left Override (e.g. doublestuffiana) */
+.crew-actor-unit[data-mode="walk"][data-facing="left"] .crew-actor-btn:not(:has([data-frame-id="walk-l-c"])) .crew-actor-sprite[data-frame-id="walk-l-a"] { animation: frame-show-2 0.6s infinite step-end 0s !important; }
+.crew-actor-unit[data-mode="walk"][data-facing="left"] .crew-actor-btn:not(:has([data-frame-id="walk-l-c"])) .crew-actor-sprite[data-frame-id="walk-l-b"] { animation: frame-show-2 0.6s infinite step-end 0.3s !important; }
+
 /* 4-Frame Walk Right */
 .crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-sprite[data-frame-id="walk-r-a"] { animation: frame-show-4 0.6s infinite step-end 0s; }
 .crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-sprite[data-frame-id="walk-r-b"] { animation: frame-show-4 0.6s infinite step-end 0.15s; }
 .crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-sprite[data-frame-id="walk-r-c"] { animation: frame-show-4 0.6s infinite step-end 0.3s; }
 .crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-sprite[data-frame-id="walk-r-d"] { animation: frame-show-4 0.6s infinite step-end 0.45s; }
+
+/* 2-Frame Walk Right Override (e.g. doublestuffiana) */
+.crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-btn:not(:has([data-frame-id="walk-r-c"])) .crew-actor-sprite[data-frame-id="walk-r-a"] { animation: frame-show-2 0.6s infinite step-end 0s !important; }
+.crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-btn:not(:has([data-frame-id="walk-r-c"])) .crew-actor-sprite[data-frame-id="walk-r-b"] { animation: frame-show-2 0.6s infinite step-end 0.3s !important; }
 
 /* 2-Frame Cheer */
 .crew-actor-unit[data-mode="cheer"] .crew-actor-sprite[data-frame-id="cheer-a"] { animation: frame-show-2 0.6s infinite step-end 0s; }

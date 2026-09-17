@@ -152,7 +152,7 @@ function App() {
         const brief = await getBeepsDailyBrief({ date, timezone });
         return formatDailyBrief(brief, timezone);
       } catch (error) {
-        return `I couldn\'t read today\'s calendar. ${error instanceof Error ? error.message : "The protected Calendar connector needs attention."}`;
+        return `I couldn't read today's calendar. ${error instanceof Error ? error.message : "The protected Calendar connector needs attention."}`;
       }
     }
 
@@ -160,7 +160,7 @@ function App() {
       try {
         return formatWorkIntake(await getBeepsWorkIntake());
       } catch (error) {
-        return `I couldn\'t read the work intake. ${error instanceof Error ? error.message : "The protected Gmail connector needs attention."}`;
+        return `I couldn't read the work intake. ${error instanceof Error ? error.message : "The protected Gmail connector needs attention."}`;
       }
     }
 
@@ -208,7 +208,7 @@ function App() {
       );
       return result;
     } catch (error) {
-      return `I couldn\'t reach Bee Brain. ${error instanceof Error ? error.message : "Try opening the Navigator."}`;
+      return `I couldn't reach Bee Brain. ${error instanceof Error ? error.message : "Try opening the Navigator."}`;
     }
   };
 

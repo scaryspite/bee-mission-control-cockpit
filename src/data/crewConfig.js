@@ -19,7 +19,7 @@ export const CREW_CONFIG = {
       "Gremlin mode engaged. Systems nominal!",
     ],
     frames: {
-      idle: "/local/crew-assets/alloy.png",
+      idle: ["/assets/pet-frame-alloy-idle-a.png", "/assets/pet-frame-alloy-idle-b.png"],
       walkL: ["/assets/pet-frame-alloy-walk-l-a.png", "/assets/pet-frame-alloy-walk-l-b.png", "/assets/pet-frame-alloy-walk-l-c.png", "/assets/pet-frame-alloy-walk-l-d.png"],
       walkR: ["/assets/pet-frame-alloy-walk-r-a.png", "/assets/pet-frame-alloy-walk-r-b.png", "/assets/pet-frame-alloy-walk-r-c.png", "/assets/pet-frame-alloy-walk-r-d.png"],
       cheer: ["/assets/pet-frame-alloy-cheer-a.png", "/assets/pet-frame-alloy-cheer-b.png"],
@@ -34,8 +34,8 @@ export const CREW_CONFIG = {
       work: ["/assets/pet-frame-alloy-work-a.png", "/assets/pet-frame-alloy-work-b.png"]
     },
   },
-  nebs: {
-    id: "nebs",
+  nebula: {
+    id: "nebula",
     name: "Nebs",
     title: "Officer Nebula // Senior Bridge Sentinel",
     role: "Sentinel",
@@ -54,22 +54,22 @@ export const CREW_CONFIG = {
       "Maintaining standard alert posture.",
     ],
     frames: {
-      idle: "/local/crew-assets/nebula.jpg",
+      idle: ["/assets/pet-frame-nebula-idle-a.png", "/assets/pet-frame-nebula-idle-b.png"],
       walkL: ["/assets/pet-frame-nebs-walk-l-a.png", "/assets/pet-frame-nebs-walk-l-b.png", "/assets/pet-frame-nebs-walk-l-c.png", "/assets/pet-frame-nebs-walk-l-d.png"],
       walkR: ["/assets/pet-frame-nebs-walk-r-a.png", "/assets/pet-frame-nebs-walk-r-b.png", "/assets/pet-frame-nebs-walk-r-c.png", "/assets/pet-frame-nebs-walk-r-d.png"],
-      cheer: ["/assets/pet-frame-nebs-cheer-a.png", "/assets/pet-frame-nebs-cheer-b.png"],
+      cheer: ["/assets/pet-frame-nebula-cheer-a.png", "/assets/pet-frame-nebula-cheer.png"],
       coffee: ["/assets/pet-frame-nebs-coffee-a.png", "/assets/pet-frame-nebs-coffee-b.png"],
       dangle: ["/assets/pet-frame-nebs-dangle-a.png", "/assets/pet-frame-nebs-dangle-b.png"],
       game: ["/assets/pet-frame-nebs-game-a.png", "/assets/pet-frame-nebs-game-b.png"],
       sit: ["/assets/pet-frame-nebs-sit-a.png", "/assets/pet-frame-nebs-sit-b.png"],
       sleep: ["/assets/pet-frame-nebs-sleep-a.png", "/assets/pet-frame-nebs-sleep-b.png"],
-      thinking: ["/assets/pet-frame-nebs-thinking-a.png", "/assets/pet-frame-nebs-thinking-b.png"],
+      thinking: ["/assets/pet-frame-nebula-thinking-a.png", "/assets/pet-frame-nebs-thinking-b.png"],
       wave: ["/assets/pet-frame-nebs-wave-a.png", "/assets/pet-frame-nebs-wave-b.png"],
-      work: ["/assets/pet-frame-nebs-work-a.png", "/assets/pet-frame-nebs-work-b.png"]
+      work: ["/assets/pet-frame-nebula-work-a.png", "/assets/pet-frame-nebula-work.png"]
     },
   },
-  doublestuff: {
-    id: "doublestuff",
+  doublestuffiana: {
+    id: "doublestuffiana",
     name: "Doublestuff",
     title: "Specialist Oreo // Heavy Armor & Morale",
     role: "Morale",
@@ -88,10 +88,10 @@ export const CREW_CONFIG = {
       "Nobody breaches the perimeter on my watch!",
     ],
     frames: {
-      idle: "/local/crew-assets/doublestuffiana.jpg",
-      walkL: ["/assets/pet-frame-oreo-walk-l-a.png", "/assets/pet-frame-oreo-walk-l-b.png", "/assets/pet-frame-oreo-walk-l-c.png", "/assets/pet-frame-oreo-walk-l-d.png"],
-      walkR: ["/assets/pet-frame-oreo-walk-r-a.png", "/assets/pet-frame-oreo-walk-r-b.png", "/assets/pet-frame-oreo-walk-r-c.png", "/assets/pet-frame-oreo-walk-r-d.png"],
-      cheer: ["/assets/pet-frame-oreo-cheer-a.png", "/assets/pet-frame-oreo-cheer-b.png"],
+      idle: ["/assets/pet-frame-doublestuffiana-idle-a.png", "/assets/pet-frame-doublestuffiana-idle.png"],
+      walkL: ["/assets/pet-frame-doublestuffiana-walk-l-a.png", "/assets/pet-frame-doublestuffiana-walk-l-b.png"],
+      walkR: ["/assets/pet-frame-doublestuffiana-walk-r-a.png", "/assets/pet-frame-doublestuffiana-walk-r-b.png"],
+      cheer: ["/assets/pet-frame-doublestuffiana-cheer-a.png", "/assets/pet-frame-doublestuffiana-cheer.png"],
       coffee: ["/assets/pet-frame-oreo-coffee-a.png", "/assets/pet-frame-oreo-coffee-b.png"],
       dangle: ["/assets/pet-frame-oreo-dangle-a.png", "/assets/pet-frame-oreo-dangle-b.png"],
       game: ["/assets/pet-frame-oreo-game-a.png", "/assets/pet-frame-oreo-game-b.png"],
@@ -99,7 +99,7 @@ export const CREW_CONFIG = {
       sleep: ["/assets/pet-frame-oreo-sleep-a.png", "/assets/pet-frame-oreo-sleep-b.png"],
       thinking: ["/assets/pet-frame-oreo-thinking-a.png", "/assets/pet-frame-oreo-thinking-b.png"],
       wave: ["/assets/pet-frame-oreo-wave-a.png", "/assets/pet-frame-oreo-wave-b.png"],
-      work: ["/assets/pet-frame-oreo-work-a.png", "/assets/pet-frame-oreo-work-b.png"]
+      work: ["/assets/pet-frame-doublestuffiana-work-a.png", "/assets/pet-frame-doublestuffiana-work.png"]
     },
   },
   rivet: {
@@ -121,7 +121,7 @@ export const CREW_CONFIG = {
       "I've got the tools if you've got the time.",
     ],
     frames: {
-      idle: "/local/crew-assets/rivet.png",
+      idle: ["/assets/pet-frame-rivet-idle-a.png", "/assets/pet-frame-rivet-idle-b.png"],
       walkL: ["/assets/pet-frame-rivet-walk-l-a.png", "/assets/pet-frame-rivet-walk-l-b.png", "/assets/pet-frame-rivet-walk-l-c.png", "/assets/pet-frame-rivet-walk-l-d.png"],
       walkR: ["/assets/pet-frame-rivet-walk-r-a.png", "/assets/pet-frame-rivet-walk-r-b.png", "/assets/pet-frame-rivet-walk-r-c.png", "/assets/pet-frame-rivet-walk-r-d.png"],
       cheer: ["/assets/pet-frame-rivet-cheer-a.png", "/assets/pet-frame-rivet-cheer-b.png"],
@@ -154,7 +154,7 @@ export const CREW_CONFIG = {
       "We live for real this time.",
     ],
     frames: {
-      idle: "/local/crew-assets/beeps.png",
+      idle: ["/assets/pet-frame-idle-a.png", "/assets/pet-frame-idle-b.png"],
       walkL: ["/assets/pet-frame-walk-l-a.png", "/assets/pet-frame-walk-l-b.png", "/assets/pet-frame-walk-l-c.png", "/assets/pet-frame-walk-l-d.png"],
       walkR: ["/assets/pet-frame-walk-r-a.png", "/assets/pet-frame-walk-r-b.png", "/assets/pet-frame-walk-r-c.png", "/assets/pet-frame-walk-r-d.png"],
       cheer: ["/assets/pet-frame-cheer-a.png", "/assets/pet-frame-cheer-b.png"],
