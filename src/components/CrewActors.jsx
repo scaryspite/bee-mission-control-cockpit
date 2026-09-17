@@ -101,29 +101,7 @@ function CrewMember({ config, isWorking }) {
 
 
 
-  // MOCK TELEMETRY: In a real app, this would be a WebSocket or SSE listener
-  useEffect(() => {
-    const handleStatusDispatch = (payload) => {
-      const { crew_member, task } = payload;
-      if (crew_member in crewStatus) {
-        setCrewStatus(prev => ({ ...prev, [crew_member]: task === 'start' }));
-      }
-    };
 
-    const unsubscribe = beepsSDK.observe('crew-dispatch', handleStatusDispatch);
-
-    // Example of dispatching Alloy after 3s with a clear task detail
-    setTimeout(() => {
-      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'start', task_detail: 'Running deep-space diagnostic scan.' });
-    }, 3000);
-    
-    // Example of stopping Alloy after 8s with a completion message
-    setTimeout(() => {
-      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'stop', task_detail: 'Diagnostic scan complete. All systems nominal.' });
-    }, 8000);
-
-    return unsubscribe;
-  }, [crewStatus, setCrewStatus]);
 
 
 
@@ -209,9 +187,16 @@ export default function CrewActors() {
   useEffect(() => {
     const handleStatusDispatch = (payload) => {
       const { crew_member, task } = payload;
-      if (crew_member in crewStatus) {
-        setCrewStatus(prev => ({ ...prev, [crew_member]: task === 'start' }));
-      }
+      let memberKey = (crew_member || "").toLowerCase().trim();
+      if (memberKey === "nebula" || memberKey === "nebs") memberKey = "nebs";
+      if (memberKey === "oreo" || memberKey === "doublestuffiana" || memberKey === "doublestuff") memberKey = "doublestuff";
+
+      setCrewStatus(prev => {
+        if (memberKey in prev) {
+          return { ...prev, [memberKey]: task === 'start' || task === 'working' };
+        }
+        return prev;
+      });
     };
 
     const unsubscribe = beepsSDK.observe('crew-dispatch', handleStatusDispatch);
