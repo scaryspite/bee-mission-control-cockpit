@@ -155,8 +155,8 @@
 }
 
 .room-scene[data-room="bridge"] {
-  --scene-border: rgba(75, 179, 184, 0.64);
-  --scene-background: linear-gradient(90deg, rgba(7, 9, 13, 0.16), rgba(7, 9, 13, 0.04) 58%, rgba(7, 9, 13, 0.32)), url("/assets/background-command-deck-b.png") center / cover no-repeat;
+   --scene-border: rgba(226, 85, 85, 0.64);
+  --scene-background: linear-gradient(90deg, rgba(13, 7, 7, 0.16), rgba(13, 7, 7, 0.04) 58%, rgba(13, 7, 7, 0.32)), url("/assets/background-command-deck-b.png") center / cover no-repeat;
 }
 
 .room-scene[data-room="bee-brain"] {

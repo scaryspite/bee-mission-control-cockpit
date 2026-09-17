@@ -1,26 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import "./CrewActors.css";
 import beepsSDK from "../sdk/BeepsSDK";
-
-// Custom hook for managing frame-by-frame animation loops with dynamic delays
-function useInterval(callback, delay) {
-  const savedCallback = useRef();
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  useEffect(() => {
-    function tick() {
-      savedCallback.current();
-    }
-    if (delay !== null) {
-      const id = setInterval(tick, delay);
-      return () => clearInterval(id);
-    }
-  }, [delay]);
-}
-
 
 import { CREW_CONFIG } from "../data/crewConfig";
 
@@ -34,8 +14,6 @@ function CrewMember({ config, isWorking }) {
   const walkTimer = useRef(null);
   const bubbleTimer = useRef(null);
   const workTimer = useRef(null);
-
-  const [frame, setFrame] = useState(0);
 
   // Set work mode based on telemetry prop
   useEffect(() => {
@@ -53,20 +31,6 @@ function CrewMember({ config, isWorking }) {
       }
     }
   }, [isWorking, mode]);
-
-  // Animation loop
-  useInterval(() => {
-    let currentAnimation;
-    if (mode === "walk") {
-      currentAnimation = facing === "left" ? config.frames.walkL : config.frames.walkR;
-    } else {
-      currentAnimation = config.frames[mode] || config.frames.idle;
-    }
-    
-    if (Array.isArray(currentAnimation)) {
-      setFrame((prevFrame) => (prevFrame + 1) % currentAnimation.length);
-    }
-  }, 150);
 
 
   // Autonomous wandering patrol cycle within dedicated bounds
@@ -161,21 +125,21 @@ function CrewMember({ config, isWorking }) {
     return unsubscribe;
   }, [crewStatus, setCrewStatus]);
 
-  // Determine current active sprite frame
-  let currentSprite = config.frames.idle[0]; // Default to first frame
-  let activeAnimationConfig;
-  
-  if (mode === "walk") {
-    activeAnimationConfig = facing === "left" ? config.frames.walkL : config.frames.walkR;
-  } else {
-    activeAnimationConfig = config.frames[mode] || config.frames.idle;
-  }
 
-  if (Array.isArray(activeAnimationConfig)) {
-    currentSprite = activeAnimationConfig[frame % activeAnimationConfig.length];
-  } else if (activeAnimationConfig) {
-    currentSprite = activeAnimationConfig;
-  }
+
+  const framesList = React.useMemo(() => {
+    const list = [];
+    const f = config.frames;
+    if (typeof f.idle === 'string') list.push({ id: 'idle-a', src: f.idle });
+    else if (Array.isArray(f.idle)) f.idle.forEach((s, i) => list.push({ id: `idle-${['a','b'][i] || i}`, src: s }));
+
+    if (Array.isArray(f.walkL)) f.walkL.forEach((s, i) => list.push({ id: `walk-l-${['a','b','c','d'][i]||i}`, src: s }));
+    if (Array.isArray(f.walkR)) f.walkR.forEach((s, i) => list.push({ id: `walk-r-${['a','b','c','d'][i]||i}`, src: s }));
+    if (Array.isArray(f.cheer)) f.cheer.forEach((s, i) => list.push({ id: `cheer-${['a','b'][i]||i}`, src: s }));
+    if (Array.isArray(f.work)) f.work.forEach((s, i) => list.push({ id: `work-${['a','b'][i]||i}`, src: s }));
+    
+    return list;
+  }, [config.frames]);
 
   const actorStyle = {
     "--crew-accent": config.accent,
@@ -213,12 +177,16 @@ function CrewMember({ config, isWorking }) {
         aria-label={`${config.name} ${config.role} actor`}
       >
         <div className="crew-actor-halo" aria-hidden="true" />
-        <img
-          src={currentSprite}
-          alt={config.name}
-          className={`crew-actor-sprite crew-actor-sprite--${config.id}`}
-          draggable="false"
-        />
+        {framesList.map(frame => (
+          <img
+            key={frame.id}
+            src={frame.src}
+            alt={`${config.name} ${frame.id}`}
+            className={`crew-actor-sprite crew-actor-sprite--${config.id}`}
+            data-frame-id={frame.id}
+            draggable="false"
+          />
+        ))}
         <div className="crew-actor-badge">
           <span className="crew-badge-name">{config.name}</span>
           <span className="crew-badge-role">{config.role}</span>

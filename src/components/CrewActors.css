@@ -37,6 +37,8 @@
   cursor: pointer;
   outline: none;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), filter 0.22s ease;
+  width: 210px;
+  height: 315px;
 }
 
 .crew-actor-btn:hover {
@@ -74,119 +76,57 @@
   object-fit: contain;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.72));
   transition: transform 0.2s ease, filter 0.2s ease;
+  width: 210px;
+  height: 315px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ==========================================================================
-   Character Specific Sizing (Prominent & Alive)
+   Unified Opacity Keyframe Walk Cycles & Actions
    ========================================================================== */
 
-/* 1. Alloy - Cyber-Scrapper Cat on Top Deck Catwalk */
-.crew-actor-sprite--alloy {
-  width: clamp(124px, 11vw, 154px);
-  height: auto;
+/* 2-Frame Idle */
+.crew-actor-unit[data-mode="idle"] .crew-actor-sprite[data-frame-id="idle-a"] { animation: frame-show-2 0.8s infinite step-end 0s; }
+.crew-actor-unit[data-mode="idle"] .crew-actor-sprite[data-frame-id="idle-b"] { animation: frame-show-2 0.8s infinite step-end 0.4s; }
+
+/* If a character only has one idle frame, lock it open */
+.crew-actor-btn:not(:has([data-frame-id="idle-b"])) [data-frame-id="idle-a"] {
+  animation: none !important;
+  opacity: 1 !important;
 }
 
-/* 2. Nebs - Tall Sentinel Officer on Left Tactical Deck */
-.crew-actor-sprite--nebs {
-  width: clamp(100px, 9vw, 130px);
-  height: clamp(195px, 23vh, 255px);
+/* 4-Frame Walk Left */
+.crew-actor-unit[data-mode="walk"][data-facing="left"] .crew-actor-sprite[data-frame-id="walk-l-a"] { animation: frame-show-4 0.6s infinite step-end 0s; }
+.crew-actor-unit[data-mode="walk"][data-facing="left"] .crew-actor-sprite[data-frame-id="walk-l-b"] { animation: frame-show-4 0.6s infinite step-end 0.15s; }
+.crew-actor-unit[data-mode="walk"][data-facing="left"] .crew-actor-sprite[data-frame-id="walk-l-c"] { animation: frame-show-4 0.6s infinite step-end 0.3s; }
+.crew-actor-unit[data-mode="walk"][data-facing="left"] .crew-actor-sprite[data-frame-id="walk-l-d"] { animation: frame-show-4 0.6s infinite step-end 0.45s; }
+
+/* 4-Frame Walk Right */
+.crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-sprite[data-frame-id="walk-r-a"] { animation: frame-show-4 0.6s infinite step-end 0s; }
+.crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-sprite[data-frame-id="walk-r-b"] { animation: frame-show-4 0.6s infinite step-end 0.15s; }
+.crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-sprite[data-frame-id="walk-r-c"] { animation: frame-show-4 0.6s infinite step-end 0.3s; }
+.crew-actor-unit[data-mode="walk"][data-facing="right"] .crew-actor-sprite[data-frame-id="walk-r-d"] { animation: frame-show-4 0.6s infinite step-end 0.45s; }
+
+/* 2-Frame Cheer */
+.crew-actor-unit[data-mode="cheer"] .crew-actor-sprite[data-frame-id="cheer-a"] { animation: frame-show-2 0.6s infinite step-end 0s; }
+.crew-actor-unit[data-mode="cheer"] .crew-actor-sprite[data-frame-id="cheer-b"] { animation: frame-show-2 0.6s infinite step-end 0.3s; }
+
+/* 2-Frame Work */
+.crew-actor-unit[data-mode="work"] .crew-actor-sprite[data-frame-id="work-a"] { animation: frame-show-2 0.5s infinite step-end 0s; }
+.crew-actor-unit[data-mode="work"] .crew-actor-sprite[data-frame-id="work-b"] { animation: frame-show-2 0.5s infinite step-end 0.25s; }
+
+@keyframes frame-show-4 {
+  0%, 24.9% { opacity: 1; }
+  25%, 100% { opacity: 0; }
 }
 
-/* 3. Doublestuffiana - Armored Powerhouse on Right Heavy Deck */
-.crew-actor-sprite--doublestuff {
-  width: clamp(138px, 12.5vw, 178px);
-  height: clamp(160px, 19.5vh, 210px);
-}
-
-/* ==========================================================================
-   Dynamic Motion & Keyframe Cycles (Walk, Idle, Cheer)
-   ========================================================================== */
-
-/* --- Alloy Animations --- */
-.crew-actor-unit--alloy[data-mode="idle"] .crew-actor-sprite {
-  animation: alloy-idle-gremlin 3.6s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--alloy[data-mode="walk"] .crew-actor-sprite {
-  animation: alloy-walk-scamper 0.32s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--alloy[data-mode="cheer"] .crew-actor-sprite {
-  animation: alloy-cheer-bounce 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
-}
-
-@keyframes alloy-idle-gremlin {
-  0% { transform: translateY(0) rotate(0deg); }
-  40% { transform: translateY(-3px) rotate(-1deg); }
-  80% { transform: translateY(1px) rotate(1deg); }
-  100% { transform: translateY(0) rotate(0deg); }
-}
-
-@keyframes alloy-walk-scamper {
-  0% { transform: translateY(0) rotate(-1.5deg); }
-  100% { transform: translateY(-5px) rotate(1.5deg); }
-}
-
-@keyframes alloy-cheer-bounce {
-  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px #e2ad55); }
-  100% { transform: scale(1.08) translateY(-10px); filter: drop-shadow(0 0 24px #e2ad55); }
-}
-
-/* --- Nebs Animations --- */
-.crew-actor-unit--nebs[data-mode="idle"] .crew-actor-sprite {
-  animation: nebs-idle-sentinel 4.2s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--nebs[data-mode="walk"] .crew-actor-sprite {
-  animation: nebs-walk-stride 0.44s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--nebs[data-mode="cheer"] .crew-actor-sprite {
-  animation: nebs-cheer-salute 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
-}
-
-@keyframes nebs-idle-sentinel {
-  0% { transform: scale(1) translateY(0); }
-  100% { transform: scale(1.025) translateY(-3px); }
-}
-
-@keyframes nebs-walk-stride {
-  0% { transform: translateY(0) rotate(-1deg); }
-  100% { transform: translateY(-6px) rotate(1deg); }
-}
-
-@keyframes nebs-cheer-salute {
-  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 12px #b28ae8); }
-  100% { transform: scale(1.06) translateY(-8px); filter: drop-shadow(0 0 26px #b28ae8); }
-}
-
-/* --- Doublestuffiana Animations --- */
-.crew-actor-unit--doublestuff[data-mode="idle"] .crew-actor-sprite {
-  animation: doublestuff-idle-heart 3.8s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--doublestuff[data-mode="walk"] .crew-actor-sprite {
-  animation: doublestuff-walk-waddle 0.38s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--doublestuff[data-mode="cheer"] .crew-actor-sprite {
-  animation: doublestuff-cheer-flex 0.58s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
-}
-
-@keyframes doublestuff-idle-heart {
-  0% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-2px) scale(1.015, 0.99); }
-  100% { transform: translateY(0) scale(1); }
-}
-
-@keyframes doublestuff-walk-waddle {
-  0% { transform: translateY(0) rotate(-2deg); }
-  100% { transform: translateY(-5px) rotate(2deg); }
-}
-
-@keyframes doublestuff-cheer-flex {
-  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px #f180bd); }
-  100% { transform: scale(1.08) translateY(-8px); filter: drop-shadow(0 0 26px #f180bd); }
+@keyframes frame-show-2 {
+  0%, 49.9% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
 /* ==========================================================================
@@ -302,73 +242,7 @@
   border-top: 6px solid var(--crew-accent);
 }
 
-/* 4. Rivet - Chief Mechanic */
-.crew-actor-sprite--rivet {
-  width: clamp(110px, 10vw, 140px);
-  height: clamp(170px, 20vh, 220px);
-}
 
-/* 5. Beeps - Mission Co-Pilot */
-.crew-actor-sprite--beeps {
-  width: clamp(110px, 10vw, 140px);
-  height: clamp(170px, 20vh, 220px);
-}
-
-/* --- Rivet Animations --- */
-.crew-actor-unit--rivet[data-mode="idle"] .crew-actor-sprite {
-  animation: rivet-idle-mechanic 4.0s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--rivet[data-mode="walk"] .crew-actor-sprite {
-  animation: rivet-walk-step 0.4s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--rivet[data-mode="cheer"] .crew-actor-sprite {
-  animation: rivet-cheer-wrench 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
-}
-
-@keyframes rivet-idle-mechanic {
-  0% { transform: scale(1) translateY(0); }
-  100% { transform: scale(1.02) translateY(-2px); }
-}
-
-@keyframes rivet-walk-step {
-  0% { transform: translateY(0) rotate(-1.5deg); }
-  100% { transform: translateY(-5px) rotate(1.5deg); }
-}
-
-@keyframes rivet-cheer-wrench {
-  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px #4caf50); }
-  100% { transform: scale(1.06) translateY(-8px); filter: drop-shadow(0 0 24px #4caf50); }
-}
-
-/* --- Beeps Animations --- */
-.crew-actor-unit--beeps[data-mode="idle"] .crew-actor-sprite {
-  animation: beeps-idle-copilot 3.8s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--beeps[data-mode="walk"] .crew-actor-sprite {
-  animation: beeps-walk-stride 0.35s ease-in-out infinite alternate;
-}
-
-.crew-actor-unit--beeps[data-mode="cheer"] .crew-actor-sprite {
-  animation: beeps-cheer-joy 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) infinite alternate;
-}
-
-@keyframes beeps-idle-copilot {
-  0% { transform: scale(1) translateY(0); }
-  100% { transform: scale(1.02) translateY(-3px); }
-}
-
-@keyframes beeps-walk-stride {
-  0% { transform: translateY(0) rotate(-1.5deg); }
-  100% { transform: translateY(-5px) rotate(1.5deg); }
-}
-
-@keyframes beeps-cheer-joy {
-  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px #00e5ff); }
-  100% { transform: scale(1.08) translateY(-10px); filter: drop-shadow(0 0 24px #00e5ff); }
-}
 
 /* Hide crew overlay on cramped mobile viewports if necessary */
 @media (max-width: 680px) {
