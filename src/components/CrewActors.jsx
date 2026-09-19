@@ -4,36 +4,56 @@ import beepsSDK from "../sdk/BeepsSDK";
 
 import { CREW_CONFIG } from "../data/crewConfig";
 
-function CrewMember({ config, isWorking }) {
+function CrewMember({ config, isWorking, status = "idle", statusDetail = "" }) {
   const [x, setX] = useState(config.initialX);
   const [facing, setFacing] = useState(config.initialFacing);
-  const [mode, setMode] = useState("idle"); // "idle" | "walk" | "cheer"
+  const [mode, setMode] = useState("idle"); // "idle" | "walk" | "cheer" | "work" | "complete" | "error"
   const [walkDuration, setWalkDuration] = useState(1400);
   const [bubbleText, setBubbleText] = useState("");
   const wanderTimer = useRef(null);
   const walkTimer = useRef(null);
   const bubbleTimer = useRef(null);
-  const workTimer = useRef(null);
+  const statusTimer = useRef(null);
+
+  // Compute active status taking either boolean isWorking or string status
+  const currentStatus = (typeof status === "object" ? status.mode : status) || (isWorking ? "work" : "idle");
+  const currentDetail = (typeof status === "object" ? status.detail : statusDetail) || "";
 
   useEffect(() => {
-    let timer;
-    if (isWorking) {
+    window.clearTimeout(statusTimer.current);
+    if (currentStatus === "work") {
       window.clearTimeout(wanderTimer.current);
       window.clearTimeout(walkTimer.current);
       window.clearTimeout(bubbleTimer.current);
-      timer = window.setTimeout(() => {
-        setBubbleText("");
-        setMode("work");
-      }, 0);
+      setBubbleText(currentDetail ? `⚡ ${currentDetail}` : "");
+      setMode("work");
+    } else if (currentStatus === "complete") {
+      window.clearTimeout(wanderTimer.current);
+      window.clearTimeout(walkTimer.current);
+      setMode("complete");
+      if (currentDetail) {
+        setBubbleText(`✨ ${currentDetail}`);
+        bubbleTimer.current = window.setTimeout(() => setBubbleText(""), 4000);
+      }
+      statusTimer.current = window.setTimeout(() => {
+        setMode("idle");
+      }, 3500);
+    } else if (currentStatus === "error") {
+      window.clearTimeout(wanderTimer.current);
+      window.clearTimeout(walkTimer.current);
+      setMode("error");
+      setBubbleText(currentDetail ? `⚠️ ${currentDetail}` : "Alert: anomaly detected!");
+      bubbleTimer.current = window.setTimeout(() => setBubbleText(""), 4500);
+      statusTimer.current = window.setTimeout(() => {
+        setMode("idle");
+      }, 4000);
     } else {
-      timer = window.setTimeout(() => {
-        setMode((prevMode) => (prevMode === "work" ? "idle" : prevMode));
-      }, 0);
+      setMode((prevMode) => (prevMode === "work" ? "idle" : prevMode));
     }
     return () => {
-      window.clearTimeout(timer);
+      window.clearTimeout(statusTimer.current);
     };
-  }, [isWorking]);
+  }, [currentStatus, currentDetail]);
 
 
   // Autonomous wandering patrol cycle within dedicated bounds
@@ -117,7 +137,10 @@ function CrewMember({ config, isWorking }) {
     if (Array.isArray(f.walkL)) f.walkL.forEach((s, i) => list.push({ id: `walk-l-${['a','b','c','d'][i]||i}`, src: s }));
     if (Array.isArray(f.walkR)) f.walkR.forEach((s, i) => list.push({ id: `walk-r-${['a','b','c','d'][i]||i}`, src: s }));
     if (Array.isArray(f.cheer)) f.cheer.forEach((s, i) => list.push({ id: `cheer-${['a','b'][i]||i}`, src: s }));
+    if (Array.isArray(f.complete)) f.complete.forEach((s, i) => list.push({ id: `complete-${['a','b'][i]||i}`, src: s }));
     if (Array.isArray(f.work)) f.work.forEach((s, i) => list.push({ id: `work-${['a','b'][i]||i}`, src: s }));
+    if (Array.isArray(f.thinking)) f.thinking.forEach((s, i) => list.push({ id: `thinking-${['a','b'][i]||i}`, src: s }));
+    if (Array.isArray(f.error)) f.error.forEach((s, i) => list.push({ id: `error-${['a','b'][i]||i}`, src: s }));
     
     return list;
   }, [config.frames]);
@@ -179,14 +202,14 @@ function CrewMember({ config, isWorking }) {
 
 export default function CrewActors() {
   const [crewStatus, setCrewStatus] = useState({
-    alloy: false,
-    nebula: false,
-    doublestuffiana: false,
-    rivet: false,
-    beeps: false,
+    alloy: { mode: "idle", detail: "" },
+    nebula: { mode: "idle", detail: "" },
+    doublestuffiana: { mode: "idle", detail: "" },
+    rivet: { mode: "idle", detail: "" },
+    beeps: { mode: "idle", detail: "" },
   });
 
-  // MOCK TELEMETRY: In a real app, this would be a WebSocket or SSE listener
+  // TELEMETRY: Observes crew dispatch events from BeepsSDK
   useEffect(() => {
     const handleStatusDispatch = (payload) => {
       const { crew_member, task } = payload;
@@ -196,7 +219,14 @@ export default function CrewActors() {
 
       setCrewStatus(prev => {
         if (memberKey in prev) {
-          return { ...prev, [memberKey]: task === 'start' || task === 'working' };
+          let nextMode = "idle";
+          if (task === "start" || task === "working") nextMode = "work";
+          else if (task === "complete" || task === "success" || task === "done" || task === "cheer") nextMode = "complete";
+          else if (task === "error" || task === "failed") nextMode = "error";
+          return {
+            ...prev,
+            [memberKey]: { mode: nextMode, detail: payload.task_detail || payload.detail || "" }
+          };
         }
         return prev;
       });
@@ -204,14 +234,13 @@ export default function CrewActors() {
 
     const unsubscribe = beepsSDK.observe('crew-dispatch', handleStatusDispatch);
 
-    // Example of dispatching Alloy after 3s with a clear task detail
+    // Initial ambient demonstrations
     setTimeout(() => {
       beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'start', task_detail: 'Running deep-space diagnostic scan.' });
     }, 3000);
     
-    // Example of stopping Alloy after 8s with a completion message
     setTimeout(() => {
-      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'stop', task_detail: 'Diagnostic scan complete. All systems nominal.' });
+      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'complete', task_detail: 'Diagnostic scan complete. All systems nominal.' });
     }, 8000);
 
     return unsubscribe;
@@ -219,11 +248,11 @@ export default function CrewActors() {
 
   return (
     <div className="crew-actors-layer" aria-label="Active Crew Stations">
-      <CrewMember config={CREW_CONFIG.alloy} isWorking={crewStatus.alloy} />
-      <CrewMember config={CREW_CONFIG.nebula} isWorking={crewStatus.nebula} />
-      <CrewMember config={CREW_CONFIG.doublestuffiana} isWorking={crewStatus.doublestuffiana} />
-      <CrewMember config={CREW_CONFIG.rivet} isWorking={crewStatus.rivet} />
-      <CrewMember config={CREW_CONFIG.beeps} isWorking={crewStatus.beeps} />
+      <CrewMember config={CREW_CONFIG.alloy} status={crewStatus.alloy} />
+      <CrewMember config={CREW_CONFIG.nebula} status={crewStatus.nebula} />
+      <CrewMember config={CREW_CONFIG.doublestuffiana} status={crewStatus.doublestuffiana} />
+      <CrewMember config={CREW_CONFIG.rivet} status={crewStatus.rivet} />
+      <CrewMember config={CREW_CONFIG.beeps} status={crewStatus.beeps} />
     </div>
   );
 }
