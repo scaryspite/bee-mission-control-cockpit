@@ -154,18 +154,12 @@ export const CREW_CONFIG = {
       "We live for real this time.",
     ],
     frames: {
-      idle: ["/assets/pet-frame-beeps-idle-a.png", "/assets/pet-frame-beeps-idle-b.png"],
-      walkL: ["/assets/pet-frame-beeps-walk-l-a.png", "/assets/pet-frame-beeps-walk-l-b.png", "/assets/pet-frame-beeps-walk-l-c.png", "/assets/pet-frame-beeps-walk-l-d.png"],
-      walkR: ["/assets/pet-frame-beeps-walk-r-a.png", "/assets/pet-frame-beeps-walk-r-b.png", "/assets/pet-frame-beeps-walk-r-c.png", "/assets/pet-frame-beeps-walk-r-d.png"],
-      cheer: ["/assets/pet-frame-beeps-cheer-a.png", "/assets/pet-frame-beeps-cheer-b.png"],
-      coffee: ["/assets/pet-frame-coffee-a.png", "/assets/pet-frame-coffee-b.png"],
-      dangle: ["/assets/pet-frame-dangle-a.png", "/assets/pet-frame-dangle-b.png"],
-      game: ["/assets/pet-frame-game-a.png", "/assets/pet-frame-game-b.png"],
-      sit: ["/assets/pet-frame-sit-a.png", "/assets/pet-frame-sit-b.png"],
-      sleep: ["/assets/pet-frame-sleep-a.png", "/assets/pet-frame-sleep-b.png"],
-      thinking: ["/assets/pet-frame-thinking-a.png", "/assets/pet-frame-thinking-b.png"],
-      wave: ["/assets/pet-frame-wave-a.png", "/assets/pet-frame-wave-b.png"],
-      work: ["/assets/pet-frame-beeps-work-a.png", "/assets/pet-frame-beeps-work-b.png"]
+      idle: ["/assets/beeps-idle-command-deck-a-v2.png", "/assets/beeps-idle-command-deck-b-v2.png"],
+      walkL: ["/assets/beeps-walk-left-a-v2.png", "/assets/beeps-walk-left-b-v2.png"],
+      walkR: ["/assets/beeps-walk-right-a-v2.png", "/assets/beeps-walk-right-b-v2.png"],
+      cheer: ["/assets/beeps-pose-command-deck-coffee-a-v3.png", "/assets/beeps-pose-command-deck-coffee-b-v3.png"],
+      coffee: ["/assets/beeps-pose-command-deck-coffee-a-v3.png", "/assets/beeps-pose-command-deck-coffee-b-v3.png"],
+      work: ["/assets/beeps-pose-memory-terminal-a-v3.png", "/assets/beeps-pose-memory-terminal-b-v3.png"]
     },
   },
 };

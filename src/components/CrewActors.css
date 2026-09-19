@@ -85,6 +85,10 @@
   pointer-events: none;
 }
 
+.crew-actor-sprite--beeps {
+  image-rendering: auto;
+}
+
 /* ==========================================================================
    Unified Opacity Keyframe Walk Cycles & Actions
    ========================================================================== */

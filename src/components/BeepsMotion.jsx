@@ -10,22 +10,22 @@ const roomLabels = {
 
 const walkFrames = {
   front: [
-    "/assets/pet-frame-walk-l-a.png",
-    "/assets/pet-frame-walk-l-c.png",
-    "/assets/pet-frame-walk-r-a.png",
-    "/assets/pet-frame-walk-r-c.png",
+    "/assets/beeps-walk-left-a-v2.png",
+    "/assets/beeps-walk-left-b-v2.png",
+    "/assets/beeps-walk-right-a-v2.png",
+    "/assets/beeps-walk-right-b-v2.png",
   ],
   left: [
-    "/assets/pet-frame-walk-l-a.png",
-    "/assets/pet-frame-walk-l-c.png",
-    "/assets/pet-frame-walk-l-b.png",
-    "/assets/pet-frame-walk-l-d.png",
+    "/assets/beeps-walk-left-a-v2.png",
+    "/assets/beeps-walk-left-b-v2.png",
+    "/assets/beeps-walk-left-a-v2.png",
+    "/assets/beeps-walk-left-b-v2.png",
   ],
   right: [
-    "/assets/pet-frame-walk-r-a.png",
-    "/assets/pet-frame-walk-r-c.png",
-    "/assets/pet-frame-walk-r-b.png",
-    "/assets/pet-frame-walk-r-d.png",
+    "/assets/beeps-walk-right-a-v2.png",
+    "/assets/beeps-walk-right-b-v2.png",
+    "/assets/beeps-walk-right-a-v2.png",
+    "/assets/beeps-walk-right-b-v2.png",
   ],
   back: [
     "/assets/beeps-facing-back.png",

@@ -6,12 +6,12 @@ import { beepsModelPoses, beepsPoseRegistry, beepsRooms } from "../data/beepsDat
 import { extractBeepsAttachments, openBeepsStream } from "../data/navigatorClient";
 
 const stateAssets = {
-  idle: "/assets/pet-frame-idle-a.png",
-  searching: "/assets/pet-frame-work-a.png",
-  thinking: "/assets/pet-frame-thinking-a.png",
-  success: "/assets/pet-frame-cheer-a.png",
+  idle: "/assets/beeps-idle-command-deck-a-v2.png",
+  searching: "/assets/beeps-pose-memory-terminal-a-v3.png",
+  thinking: "/assets/beeps-state-thinking.png",
+  success: "/assets/beeps-pose-command-deck-coffee-a-v3.png",
   error: "/assets/beeps-state-error.png",
-  serious: "/assets/pet-frame-work-a.png",
+  serious: "/assets/beeps-pose-memory-terminal-a-v3.png",
 };
 
 const ambientGroundRatios = {
