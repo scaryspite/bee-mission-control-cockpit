@@ -53,7 +53,7 @@ export const beepsRooms = {
     state: "idle",
     accent: "#79d7e5",
     stage: {
-      actorScale: 1.55,
+      actorScale: 1.78,
       home: { x: 56, floor: 5 },
       stations: [
         station({
@@ -124,7 +124,7 @@ export const beepsRooms = {
     state: "searching",
     accent: "#b28ae8",
     stage: {
-      actorScale: 1.55,
+      actorScale: 1.78,
       home: { x: 55, floor: 5 },
       stations: [
         station({
@@ -201,7 +201,7 @@ export const beepsRooms = {
     state: "success",
     accent: "#f180bd",
     stage: {
-      actorScale: 1.55,
+      actorScale: 1.78,
       home: { x: 44, floor: 5 },
       stations: [
         station({
@@ -280,7 +280,7 @@ export const beepsRooms = {
     state: "serious",
     accent: "#e2ad55",
     stage: {
-      actorScale: 1.55,
+      actorScale: 1.78,
       home: { x: 55, floor: 5 },
       stations: [
         station({
@@ -343,7 +343,7 @@ export const beepsRooms = {
     state: "thinking",
     accent: "#79d7e5",
     stage: {
-      actorScale: 1.55,
+      actorScale: 1.78,
       home: { x: 51, floor: 5 },
       stations: [
         station({
