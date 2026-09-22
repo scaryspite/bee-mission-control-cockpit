@@ -47,8 +47,8 @@ export const beepsRooms = {
     id: "bridge",
     // The B room plate is environment-only. Render Beeps from the dedicated
     // idle pair so she has her own clean blink / settle animation.
-    ambientAsset: "athf-beeps-idle-a.png",
-    ambientAlternateAsset: "athf-beeps-idle-b.png",
+    ambientAsset: "beeps-state-idle.png",
+    ambientAlternateAsset: "beeps-state-idle.png",
     message: "Still running. Surprisingly.",
     state: "idle",
     accent: "#79d7e5",
@@ -118,8 +118,8 @@ export const beepsRooms = {
 
   "Memory Core": {
     id: "bee-brain",
-    ambientAsset: "athf-beeps-idle-a.png",
-    ambientAlternateAsset: "athf-beeps-idle-b.png",
+    ambientAsset: "beeps-state-idle.png",
+    ambientAlternateAsset: "beeps-state-idle.png",
     message: "Keeping the archive quiet while I look.",
     state: "searching",
     accent: "#b28ae8",
@@ -195,8 +195,8 @@ export const beepsRooms = {
 
   "Creative Lab": {
     id: "creative-lab",
-    ambientAsset: "athf-beeps-idle-a.png",
-    ambientAlternateAsset: "athf-beeps-idle-b.png",
+    ambientAsset: "beeps-state-idle.png",
+    ambientAlternateAsset: "beeps-state-idle.png",
     message: "A clean workbench is a dangerous invitation.",
     state: "success",
     accent: "#f180bd",
@@ -274,8 +274,8 @@ export const beepsRooms = {
 
   "Operations Engine": {
     id: "work",
-    ambientAsset: "athf-beeps-idle-a.png",
-    ambientAlternateAsset: "athf-beeps-idle-b.png",
+    ambientAsset: "beeps-state-idle.png",
+    ambientAlternateAsset: "beeps-state-idle.png",
     message: "Accuracy mode active. We are dealing with important things.",
     state: "serious",
     accent: "#e2ad55",
@@ -337,8 +337,8 @@ export const beepsRooms = {
 
   "Learning Observatory": {
     id: "school",
-    ambientAsset: "athf-beeps-idle-a.png",
-    ambientAlternateAsset: "athf-beeps-idle-b.png",
+    ambientAsset: "beeps-state-idle.png",
+    ambientAlternateAsset: "beeps-state-idle.png",
     message: "Processing assignments and questionable life decisions.",
     state: "thinking",
     accent: "#79d7e5",
@@ -416,8 +416,8 @@ export const beepsRooms = {
 
   "Cosmic Desktop": {
     id: "desktop-space",
-    ambientAsset: "athf-beeps-idle-a.png",
-    ambientAlternateAsset: "athf-beeps-idle-b.png",
+    ambientAsset: "beeps-state-idle.png",
+    ambientAlternateAsset: "beeps-state-idle.png",
     message: "Desktop horizon clear. Apps on the left, Nebs in center, files on the right.",
     state: "idle",
     accent: "#a855f7",
