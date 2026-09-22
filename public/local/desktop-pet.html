@@ -2092,7 +2092,8 @@
           window.setPetMode("thinking", "Checking comms with companion...");
           try {
             const controller = new AbortController();
-            let timeoutId = setTimeout(() => controller.abort(), 120000);
+            // Allow agents extended working time without premature timeouts (24h safety limit)
+            let timeoutId = setTimeout(() => controller.abort(), 86400000);
             const res = await safeFetch("http://127.0.0.1:5000/chat/stream", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -2113,7 +2114,7 @@
               const { value, done } = await reader.read();
               if (done) break;
               clearTimeout(timeoutId);
-              timeoutId = setTimeout(() => controller.abort(), 60000);
+              timeoutId = setTimeout(() => controller.abort(), 86400000);
               streamBuffer += decoder.decode(value, { stream: true });
               const lines = streamBuffer.split("\n");
               streamBuffer = lines.pop();
