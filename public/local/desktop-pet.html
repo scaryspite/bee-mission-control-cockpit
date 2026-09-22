@@ -46,14 +46,42 @@
       .pet-presence {
         position: absolute;
         bottom: 3px;
-        width: 156px;
-        height: 27px;
+        width: 104px;
+        height: 18px;
         border-radius: 50%;
         background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(56, 189, 248, 0.4) 35%, rgba(244, 114, 182, 0.12) 60%, transparent 75%);
         filter: blur(2.5px);
         pointer-events: none;
         animation: presence-pulse 3.2s ease-in-out infinite alternate;
         transition: transform 0.25s ease, opacity 0.25s ease;
+      }
+
+      /* Character-Specific Floor Glows & Bubble Themes */
+      .pet-stage[data-character="nebula"] .pet-presence {
+        background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(192, 132, 252, 0.5) 35%, rgba(244, 114, 182, 0.2) 60%, transparent 75%);
+        width: 104px;
+      }
+      .pet-stage[data-character="alloy"] .pet-presence {
+        background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(245, 158, 11, 0.55) 35%, rgba(251, 191, 36, 0.2) 60%, transparent 75%);
+        width: 90px;
+      }
+      .pet-stage[data-character="doublestuffiana"] .pet-presence {
+        background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(34, 197, 94, 0.5) 35%, rgba(16, 185, 129, 0.2) 60%, transparent 75%);
+        width: 140px;
+        height: 22px;
+      }
+
+      .pet-stage[data-character="nebula"] .pet-bubble {
+        border-color: rgba(192, 132, 252, 0.4);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 14px rgba(192, 132, 252, 0.3);
+      }
+      .pet-stage[data-character="alloy"] .pet-bubble {
+        border-color: rgba(245, 158, 11, 0.4);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 14px rgba(245, 158, 11, 0.3);
+      }
+      .pet-stage[data-character="doublestuffiana"] .pet-bubble {
+        border-color: rgba(34, 197, 94, 0.4);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 14px rgba(34, 197, 94, 0.3);
       }
 
       @keyframes presence-pulse {
@@ -64,7 +92,7 @@
       /* Compact Speech Bubble positioned right above actor */
       .pet-bubble {
         position: absolute;
-        bottom: 327px;
+        bottom: 222px;
         left: 10px;
         right: 10px;
         max-width: 220px;
@@ -117,7 +145,7 @@
       .pet-bubble-text {
         word-break: break-word;
         display: -webkit-box;
-        -webkit-line-clamp: 5;
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
       }
@@ -151,7 +179,8 @@
         height: 100%;
         object-fit: contain;
         object-position: center bottom;
-        image-rendering: -webkit-optimize-contrast;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
         filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.65));
         opacity: 0;
         pointer-events: none;
@@ -169,6 +198,28 @@
         animation: pet-idle-frame-b 2.8s steps(1, end) infinite, pet-breathe 3.4s ease-in-out infinite alternate;
       }
 
+      /* Complete / Cheer Animation: 2-Frame Cycle */
+      .pet-actor-box[data-mode="complete"] .frame-complete-a,
+      .pet-actor-box[data-mode="cheer"] .frame-cheer-a {
+        opacity: 1;
+        animation: pet-idle-frame-a 1.2s steps(1, end) infinite;
+      }
+      .pet-actor-box[data-mode="complete"] .frame-complete-b,
+      .pet-actor-box[data-mode="cheer"] .frame-cheer-b {
+        opacity: 0;
+        animation: pet-idle-frame-b 1.2s steps(1, end) infinite;
+      }
+
+      /* Error / Shock Animation: 2-Frame Cycle */
+      .pet-actor-box[data-mode="error"] .frame-error-a {
+        opacity: 1;
+        animation: pet-idle-frame-a 0.8s steps(1, end) infinite;
+      }
+      .pet-actor-box[data-mode="error"] .frame-error-b {
+        opacity: 0;
+        animation: pet-idle-frame-b 0.8s steps(1, end) infinite;
+      }
+
       @keyframes pet-idle-frame-a {
         0%, 82%, 100% { opacity: 1; }
         83%, 99% { opacity: 0; }
@@ -182,6 +233,39 @@
         0% { transform: translateY(0) scaleY(1); }
         50% { transform: translateY(-2px) scaleY(1.01) scaleX(0.995); }
         100% { transform: translateY(0) scaleY(1); }
+      }
+
+      /* Character Identity Auras & Indicators */
+      .pet-actor-box[data-character="nebula"] {
+        filter: drop-shadow(0 0 14px rgba(192, 132, 252, 0.5));
+      }
+      .pet-actor-box[data-character="alloy"] {
+        filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.5));
+      }
+      .pet-actor-box[data-character="doublestuffiana"] {
+        filter: drop-shadow(0 0 16px rgba(34, 197, 94, 0.5));
+      }
+      .pet-actor-box[data-character="beeps"] {
+        filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.45));
+      }
+
+      /* Staging Entrance Keyframes */
+      @keyframes pet-thud-drop {
+        0% { transform: translateY(-35px) scale(0.92); opacity: 0.6; }
+        65% { transform: translateY(4px) scale(1.08, 0.92); }
+        85% { transform: translateY(-2px) scale(0.98, 1.02); }
+        100% { transform: translateY(0) scale(1); opacity: 1; }
+      }
+
+      @keyframes pet-gremlin-pop {
+        0% { transform: translateY(30px) scale(0.85); opacity: 0.5; }
+        70% { transform: translateY(-8px) scale(1.05, 0.95); }
+        100% { transform: translateY(0) scale(1); opacity: 1; }
+      }
+
+      @keyframes pet-regal-slide {
+        0% { transform: translateY(-16px); opacity: 0.4; }
+        100% { transform: translateY(0); opacity: 1; }
       }
 
       /* Walk Animation: Left / Right Stepping with Bob, Hip Sway & Distinct Swagger */
@@ -742,43 +826,49 @@
       <!-- Floor Presence Glow -->
       <div class="pet-presence"></div>
 
-      <!-- Full Body Animated Actor (Seamless Normalized 1024x1536 Frames) -->
+      <!-- Full Body Animated Actor (8-Bit Lil Robots Sprite Suite) -->
       <div class="pet-actor-box" id="pet-actor" data-mode="idle" data-speaking="false">
         <!-- Idle 2-Frame Cycle -->
-        <img class="pet-frame frame-idle-a" src="/assets/pet-frame-idle-a.png?v=13.0" alt="" draggable="false">
-        <img class="pet-frame frame-idle-b" src="/assets/pet-frame-idle-b.png?v=13.0" alt="" draggable="false">
+        <img class="pet-frame frame-idle-a" src="/assets/beeps-idle-command-deck-a-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-idle-b" src="/assets/beeps-idle-command-deck-b-v2.png" alt="" draggable="false">
 
-        <!-- Walk Left Cycle (4-Frame Alternating Stride & Passing) -->
-        <img class="pet-frame frame-walk-l-a" src="/assets/pet-frame-walk-l-a.png?v=13.0" alt="" draggable="false">
-        <img class="pet-frame frame-walk-l-c" src="/assets/pet-frame-walk-l-c.png?v=13.0" alt="" draggable="false">
-        <img class="pet-frame frame-walk-l-b" src="/assets/pet-frame-walk-l-b.png?v=13.0" alt="" draggable="false">
-        <img class="pet-frame frame-walk-l-d" src="/assets/pet-frame-walk-l-d.png?v=13.0" alt="" draggable="false">
+        <!-- Walk Left Cycle (Using A/B frames) -->
+        <img class="pet-frame frame-walk-l-a" src="/assets/beeps-walk-left-a-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-walk-l-c" src="/assets/beeps-walk-left-b-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-walk-l-b" src="/assets/beeps-walk-left-a-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-walk-l-d" src="/assets/beeps-walk-left-b-v2.png" alt="" draggable="false">
 
-        <!-- Walk Right Cycle (4-Frame Alternating Stride & Passing) -->
-        <img class="pet-frame frame-walk-r-a" src="/assets/pet-frame-walk-r-a.png?v=13.0" alt="" draggable="false">
-        <img class="pet-frame frame-walk-r-c" src="/assets/pet-frame-walk-r-c.png?v=13.0" alt="" draggable="false">
-        <img class="pet-frame frame-walk-r-b" src="/assets/pet-frame-walk-r-b.png?v=13.0" alt="" draggable="false">
-        <img class="pet-frame frame-walk-r-d" src="/assets/pet-frame-walk-r-d.png?v=13.0" alt="" draggable="false">
+        <!-- Walk Right Cycle (Using A/B frames) -->
+        <img class="pet-frame frame-walk-r-a" src="/assets/beeps-walk-right-a-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-walk-r-c" src="/assets/beeps-walk-right-b-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-walk-r-b" src="/assets/beeps-walk-right-a-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-walk-r-d" src="/assets/beeps-walk-right-b-v2.png" alt="" draggable="false">
 
-        <!-- Poses & Actions (All Full 2-Frame Dynamic Alternating Cycles) -->
-        <img class="pet-frame frame-coffee-a" src="/assets/pet-frame-coffee-a.png?v=12.0" alt="" draggable="false">
-        <img class="pet-frame frame-coffee-b" src="/assets/pet-frame-coffee-b.png?v=12.0" alt="" draggable="false">
-        <img class="pet-frame frame-thinking-a" src="/assets/pet-frame-thinking-a.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-thinking-b" src="/assets/pet-frame-thinking-b.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-cheer-a" src="/assets/pet-frame-cheer-a.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-cheer-b" src="/assets/pet-frame-cheer-b.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-dangle-a" src="/assets/pet-frame-dangle-a.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-dangle-b" src="/assets/pet-frame-dangle-b.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-wave-a" src="/assets/pet-frame-wave-a.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-wave-b" src="/assets/pet-frame-wave-b.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-sit-a" src="/assets/pet-frame-sit-a.png?v=12.0" alt="" draggable="false">
-        <img class="pet-frame frame-sit-b" src="/assets/pet-frame-sit-b.png?v=12.0" alt="" draggable="false">
-        <img class="pet-frame frame-game-a" src="/assets/pet-frame-game-a.png?v=12.0" alt="" draggable="false">
-        <img class="pet-frame frame-game-b" src="/assets/pet-frame-game-b.png?v=12.0" alt="" draggable="false">
-        <img class="pet-frame frame-sleep-a" src="/assets/pet-frame-sleep-a.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-sleep-b" src="/assets/pet-frame-sleep-b.png?v=2.2" alt="" draggable="false">
-        <img class="pet-frame frame-work-a" src="/assets/pet-frame-work-a.png?v=13.0" alt="" draggable="false">
-        <img class="pet-frame frame-work-b" src="/assets/pet-frame-work-b.png?v=13.0" alt="" draggable="false">
+        <!-- Poses & Actions (Mapped to Complete, Work, and Idle) -->
+        <img class="pet-frame frame-coffee-a" src="/assets/beeps-pose-command-deck-coffee-a-v3.png" alt="" draggable="false">
+        <img class="pet-frame frame-coffee-b" src="/assets/beeps-pose-command-deck-coffee-b-v3.png" alt="" draggable="false">
+        <img class="pet-frame frame-thinking-a" src="/assets/beeps-state-thinking.png" alt="" draggable="false">
+        <img class="pet-frame frame-thinking-b" src="/assets/beeps-pose-command-deck-console-b-v3.png" alt="" draggable="false">
+        <img class="pet-frame frame-cheer-a" src="/assets/beeps-state-success.png" alt="" draggable="false">
+        <img class="pet-frame frame-cheer-b" src="/assets/beeps-pose-beanbag-play-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-dangle-a" src="/assets/beeps-walk-left-b-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-dangle-b" src="/assets/beeps-walk-right-b-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-wave-a" src="/assets/beeps-state-success.png" alt="" draggable="false">
+        <img class="pet-frame frame-wave-b" src="/assets/beeps-idle-command-deck-a-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-sit-a" src="/assets/beeps-pose-beanbag-idle-a-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-sit-b" src="/assets/beeps-pose-beanbag-idle-b-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-game-a" src="/assets/beeps-pose-beanbag-play-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-game-b" src="/assets/beeps-pose-beanbag-play-b-v3.png" alt="" draggable="false">
+        <img class="pet-frame frame-sleep-a" src="/assets/beeps-pose-beanbag-idle-a-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-sleep-b" src="/assets/beeps-pose-beanbag-idle-b-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-work-a" src="/assets/beeps-pose-command-deck-work-b-a-v1.png" alt="" draggable="false">
+        <img class="pet-frame frame-work-b" src="/assets/beeps-pose-command-deck-work-b-b-v1.png" alt="" draggable="false">
+
+        <!-- Complete & Error Cycles -->
+        <img class="pet-frame frame-complete-a" src="/assets/beeps-state-success.png" alt="" draggable="false">
+        <img class="pet-frame frame-complete-b" src="/assets/beeps-pose-command-deck-coffee-a-v3.png" alt="" draggable="false">
+        <img class="pet-frame frame-error-a" src="/assets/beeps-state-error.png" alt="" draggable="false">
+        <img class="pet-frame frame-error-b" src="/assets/beeps-state-serious.png" alt="" draggable="false">
       </div>
 
       <!-- Compact Context Menu -->
@@ -802,6 +892,27 @@
           <button class="pet-zone-btn" type="button" id="menu-zone-files" title="Inspect Desktop Vaults">
             <span>📁 Files</span>
             <small style="color: #94a3b8; font-size: 8px;">Right</small>
+          </button>
+        </div>
+
+        <div class="pet-menu-divider"></div>
+        <div class="pet-menu-header">Active Crew Member</div>
+        <div class="pet-zone-strip" id="crew-switcher-strip">
+          <button class="pet-zone-btn active" type="button" data-crew="beeps" title="Beeps — Flight Co-Pilot">
+            <span>🎧 Beeps</span>
+            <small style="color: #38bdf8; font-size: 8px;">Bridge</small>
+          </button>
+          <button class="pet-zone-btn" type="button" data-crew="nebula" title="Officer Nebula — Quality Sentinel">
+            <span>👑 Nebs</span>
+            <small style="color: #c084fc; font-size: 8px;">Sentinel</small>
+          </button>
+          <button class="pet-zone-btn" type="button" data-crew="alloy" title="Alloy — Scrapper Gremlin">
+            <span>🔧 Alloy</span>
+            <small style="color: #f59e0b; font-size: 8px;">Gremlin</small>
+          </button>
+          <button class="pet-zone-btn" type="button" data-crew="doublestuffiana" title="Doublestuffiana — Rotund Enforcer">
+            <span>🍩 Oreo</span>
+            <small style="color: #22c55e; font-size: 8px;">Heavy</small>
           </button>
         </div>
 
@@ -1155,16 +1266,20 @@
           void actor.offsetWidth;
           actor.classList.add("hop");
           window.setPetMode("wave");
-          const line = greetings[Math.floor(Math.random() * greetings.length)];
-          say(line, 3500);
-          setTimeout(() => {
-            if (actor.dataset.mode === "wave") {
-              window.setPetMode("idle");
-              if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
-                window.webkit.messageHandlers.beepsHost.postMessage({ action: "resumeAutonomy" });
+          if (typeof queryCompanion === "function") {
+            queryCompanion("Yo Beeps, quick check-in. What's on deck?");
+          } else {
+            const line = greetings[Math.floor(Math.random() * greetings.length)];
+            say(line, 3500);
+            setTimeout(() => {
+              if (actor.dataset.mode === "wave") {
+                window.setPetMode("idle");
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.beepsHost) {
+                  window.webkit.messageHandlers.beepsHost.postMessage({ action: "resumeAutonomy" });
+                }
               }
-            }
-          }, 3000);
+            }, 3000);
+          }
         }
 
         // Single click: hop & wave hello. Double click: open chat app
@@ -1264,6 +1379,106 @@
         const btnFiles = document.getElementById("menu-zone-files");
         if (btnFiles) btnFiles.addEventListener("click", () => sendMoveToZone("files"));
 
+        // Crew Member Switcher & Automation Mapping
+        function switchCrewMember(crewKey, customText) {
+          const actorBox = document.getElementById("pet-actor");
+          if (!actorBox) return;
+          actorBox.dataset.character = crewKey;
+
+          const stageBox = document.getElementById("pet-stage");
+          if (stageBox) stageBox.dataset.character = crewKey;
+
+          const crewMap = {
+            beeps: "beeps",
+            rivet: "rivet",
+            alloy: "alloy",
+            nebula: "nebula",
+            nebs: "nebula",
+            oreo: "oreo",
+            doublestuff: "oreo",
+            doublestuffiana: "oreo"
+          };
+          const resolvedCrew = crewMap[crewKey] || "beeps";
+
+          const frames = actorBox.querySelectorAll(".pet-frame");
+          frames.forEach(frame => {
+            const baseNameMatch = frame.className.match(/frame-([a-z0-9\-]+)/);
+            if (baseNameMatch) {
+              const baseName = baseNameMatch[1];
+              let mode = "idle";
+              let step = "a";
+              if (baseName.includes("work")) mode = "work";
+              else if (baseName.includes("cheer") || baseName.includes("complete") || baseName.includes("coffee") || baseName.includes("wave")) mode = "complete";
+              else if (baseName.includes("error")) mode = "error";
+              else mode = "idle";
+
+              if (baseName.endsWith("-b") || baseName.endsWith("-d")) step = "b";
+              else step = "a";
+
+              frame.src = `/assets/robot-${resolvedCrew}-${mode}-${step}.png`;
+            }
+          });
+
+          // Trigger signature entrance animation
+          actorBox.style.animation = "none";
+          void actorBox.offsetWidth; // trigger reflow
+          if (crewKey === "doublestuffiana") {
+            actorBox.style.animation = "pet-thud-drop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+          } else if (crewKey === "alloy") {
+            actorBox.style.animation = "pet-gremlin-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+          } else if (crewKey === "nebula") {
+            actorBox.style.animation = "pet-regal-slide 0.4s ease-out";
+          }
+
+          const speakerEl = document.getElementById("bubble-speaker");
+
+          const buttons = document.querySelectorAll("#crew-switcher-strip .pet-zone-btn");
+          buttons.forEach((b) => {
+            if (b.dataset.crew === crewKey) b.classList.add("active");
+            else b.classList.remove("active");
+          });
+
+          if (crewKey === "nebula") {
+            if (speakerEl) {
+              speakerEl.textContent = "OFFICER NEBULA";
+              speakerEl.style.color = "#c084fc";
+            }
+            const barkChance = Math.random() < 0.4;
+            if (barkChance) {
+              say(customText || "BARK! BARK! *Sensor glitched at bulkhead* ...Pardon me. Systems nominal.", 4000);
+            } else {
+              say(customText || "Officer Nebula reporting to bridge. Standards are now in effect.", 3200);
+            }
+          } else if (crewKey === "alloy") {
+            if (speakerEl) {
+              speakerEl.textContent = "ALLOY";
+              speakerEl.style.color = "#f59e0b";
+            }
+            say(customText || "Alloy here! Got my goggles down, sniffing for loose sockets!", 3000);
+          } else if (crewKey === "doublestuffiana") {
+            if (speakerEl) {
+              speakerEl.textContent = "DOUBLESTUFFIANA";
+              speakerEl.style.color = "#22c55e";
+            }
+            say(customText || "*THUD* Doublestuffiana has rolled onto the bridge! Break time soon!", 3500);
+          } else {
+            if (speakerEl) {
+              speakerEl.textContent = "BEEPS";
+              speakerEl.style.color = "var(--cyan)";
+            }
+            say(customText || "Beeps back on flight deck. What we building, Bee?", 2500);
+          }
+        }
+        window.switchCrewMember = switchCrewMember;
+
+        const crewButtons = document.querySelectorAll("#crew-switcher-strip .pet-zone-btn");
+        crewButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            menu.classList.remove("visible");
+            switchCrewMember(btn.dataset.crew);
+          });
+        });
+
         document.getElementById("menu-switch-voice").addEventListener("click", () => {
           cycleVoice();
         });
@@ -1357,28 +1572,71 @@
         }
 
         let isQueryingCompanion = false;
+        let companionSessionId = null;
         async function queryCompanion(message = "Yo Beeps, quick check-in. What's on deck?") {
           if (isQueryingCompanion) return;
           isQueryingCompanion = true;
           window.setPetMode("thinking", "Checking comms with companion...");
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
-            const res = await safeFetch("http://127.0.0.1:5000/chat", {
+            let timeoutId = setTimeout(() => controller.abort(), 120000);
+            const res = await safeFetch("http://127.0.0.1:5000/chat/stream", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ message }),
+              body: JSON.stringify({ message, session_id: companionSessionId }),
               signal: controller.signal
             });
+            if (!res || !res.ok) {
+              clearTimeout(timeoutId);
+              throw new Error(res ? "Status " + res.status : "Network failure on port 5000");
+            }
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedText = "";
+            let streamBuffer = "";
+
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              clearTimeout(timeoutId);
+              timeoutId = setTimeout(() => controller.abort(), 60000);
+              streamBuffer += decoder.decode(value, { stream: true });
+              const lines = streamBuffer.split("\n");
+              streamBuffer = lines.pop();
+
+              for (const line of lines) {
+                if (line.startsWith("data: ")) {
+                  try {
+                    const evt = JSON.parse(line.slice(6));
+                    if (evt.type === "thought") {
+                      window.setPetMode("thinking", "Pondering the flight logs...");
+                    } else if (evt.type === "tool_call") {
+                      const toolLabel = evt.name === "get_mission_control_status"
+                        ? "Checking daemons..."
+                        : evt.name === "get_recent_handoffs" || evt.name === "search_ship_memory"
+                        ? "Searching ship memory..."
+                        : `Running ${evt.name}...`;
+                      window.setPetMode("work", toolLabel);
+                    } else if (evt.type === "text") {
+                      accumulatedText += evt.text;
+                      window.setPetMode("wave");
+                      say(accumulatedText, 8000);
+                    } else if (evt.type === "done") {
+                      clearTimeout(timeoutId);
+                      if (evt.session_id) companionSessionId = evt.session_id;
+                      if (evt.response) {
+                        say(evt.response, 8000);
+                      }
+                      setTimeout(() => {
+                        window.setPetMode("idle");
+                      }, 4000);
+                    }
+                  } catch (parseErr) {}
+                }
+              }
+            }
             clearTimeout(timeoutId);
-            if (!res || !res.ok) throw new Error(res ? "Status " + res.status : "Network failure on port 5000");
-            const data = await res.json();
-            const reply = (data && data.response) ? data.response.trim() : "Comms check green!";
-            window.setPetMode("wave");
-            say(reply, 5000);
-            setTimeout(() => {
-              if (actor.dataset.mode === "wave") window.setPetMode("idle");
-            }, 5000);
           } catch (err) {
             // Port 5000 fallback to Navigator port 4173 /api/ask
             try {
@@ -1480,6 +1738,17 @@
         function handleBeepsActionEvent(type, data = {}) {
           if (!type) return;
 
+          // Route to specific crew member indicator if signaled by automation
+          if (data.character || data.crew) {
+            window.switchCrewMember(data.character || data.crew, data.text || data.summary);
+          } else if (data.category === "qa" || data.category === "lint") {
+            window.switchCrewMember("nebula", data.text || data.summary);
+          } else if (data.category === "salvage" || data.category === "cache") {
+            window.switchCrewMember("alloy", data.text || data.summary);
+          } else if (data.category === "break" || data.category === "downtime") {
+            window.switchCrewMember("doublestuffiana", data.text || data.summary);
+          }
+
           if (type === "queued" || type === "routed" || type === "generating" || type === "thinking") {
             if (cheerTimer) {
               clearTimeout(cheerTimer);
@@ -1492,10 +1761,6 @@
               cheerTimer = null;
             }
             window.setPetMode("work");
-            // NEW: Display task_detail for tool events
-            if (type === "tool" && data.task_detail) {
-              say(data.task_detail, 10000); // Display for 10 seconds
-            }
           } else if (type === "done" || type === "cheer") {
             if (cheerTimer) {
               clearTimeout(cheerTimer);
@@ -1511,7 +1776,7 @@
                 window.setPetMode("idle");
               }
               cheerTimer = null;
-            }, 10000); // Changed from 4500 to 10000 for consistency
+            }, 4500);
           } else if (type === "idle") {
             if (cheerTimer) {
               clearTimeout(cheerTimer);
