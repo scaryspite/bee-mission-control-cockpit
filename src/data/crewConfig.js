@@ -137,14 +137,14 @@ export const CREW_CONFIG = {
       "We live for real this time.",
     ],
     frames: {
-      idle: ["/assets/robot-beeps-idle-a.png", "/assets/robot-beeps-idle-b.png"],
-      walkL: ["/assets/robot-beeps-idle-a.png", "/assets/robot-beeps-idle-b.png"],
-      walkR: ["/assets/robot-beeps-idle-a.png", "/assets/robot-beeps-idle-b.png"],
-      cheer: ["/assets/robot-beeps-complete-a.png", "/assets/robot-beeps-complete-b.png"],
-      complete: ["/assets/robot-beeps-complete-a.png", "/assets/robot-beeps-complete-b.png"],
-      thinking: ["/assets/robot-beeps-error-a.png", "/assets/robot-beeps-error-b.png"],
-      error: ["/assets/robot-beeps-error-a.png", "/assets/robot-beeps-error-b.png"],
-      work: ["/assets/robot-beeps-work-a.png", "/assets/robot-beeps-work-b.png"]
+      idle: ["/assets/beeps-idle-command-deck-a-v2.png", "/assets/beeps-idle-command-deck-b-v2.png"],
+      walkL: ["/assets/beeps-walk-left-a-v2.png", "/assets/beeps-walk-left-b-v2.png"],
+      walkR: ["/assets/beeps-walk-right-a-v2.png", "/assets/beeps-walk-right-b-v2.png"],
+      cheer: ["/assets/beeps-state-success.png", "/assets/beeps-pose-command-deck-coffee-a-v3.png"],
+      complete: ["/assets/beeps-state-success.png", "/assets/beeps-pose-command-deck-coffee-a-v3.png"],
+      thinking: ["/assets/beeps-state-thinking.png", "/assets/beeps-pose-command-deck-console-b-v3.png"],
+      error: ["/assets/beeps-state-error.png", "/assets/beeps-state-serious.png"],
+      work: ["/assets/beeps-pose-command-deck-work-b-a-v1.png", "/assets/beeps-pose-command-deck-work-b-b-v1.png"]
     },
   },
 };
