@@ -2145,6 +2145,13 @@
                       setTimeout(() => {
                         window.setPetMode("idle");
                       }, 4000);
+                    } else if (evt.type === "error") {
+                      clearTimeout(timeoutId);
+                      const errMsg = evt.error || evt.message || "Encountered an error.";
+                      say(errMsg, 5000);
+                      setTimeout(() => {
+                        window.setPetMode("idle");
+                      }, 2500);
                     }
                   } catch (parseErr) {}
                 }
@@ -2291,6 +2298,20 @@
               }
               cheerTimer = null;
             }, 4500);
+          } else if (type === "error" || type === "failed" || type === "task_failed") {
+            if (cheerTimer) {
+              clearTimeout(cheerTimer);
+              cheerTimer = null;
+            }
+            let summary = data.summary || data.text || data.error || data.label || "Task interrupted or encountered an error.";
+            summary = summary.replace(/[#*`_~]/g, "").trim();
+            if (summary.length > 100) summary = summary.slice(0, 97) + "...";
+            window.setPetMode("wave", summary);
+
+            cheerTimer = setTimeout(() => {
+              window.setPetMode("idle");
+              cheerTimer = null;
+            }, 4500);
           } else if (type === "idle") {
             if (cheerTimer) {
               clearTimeout(cheerTimer);
@@ -2349,6 +2370,12 @@
             });
             sseConnection.addEventListener("done", (e) => {
               handleBeepsActionEvent("done", parsePayload(e));
+            });
+            sseConnection.addEventListener("error_event", (e) => {
+              handleBeepsActionEvent("error", parsePayload(e));
+            });
+            sseConnection.addEventListener("task_failed", (e) => {
+              handleBeepsActionEvent("task_failed", parsePayload(e));
             });
 
             sseConnection.onmessage = (e) => {
