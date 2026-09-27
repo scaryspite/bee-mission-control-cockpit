@@ -46,11 +46,11 @@
       .pet-presence {
         position: absolute;
         bottom: 3px;
-        width: 104px;
-        height: 18px;
+        width: 66px;
+        height: 12px;
         border-radius: 50%;
         background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(56, 189, 248, 0.4) 35%, rgba(244, 114, 182, 0.12) 60%, transparent 75%);
-        filter: blur(2.5px);
+        filter: blur(2px);
         pointer-events: none;
         animation: presence-pulse 3.2s ease-in-out infinite alternate;
         transition: transform 0.25s ease, opacity 0.25s ease;
@@ -59,16 +59,16 @@
       /* Character-Specific Floor Glows & Bubble Themes */
       .pet-stage[data-character="nebula"] .pet-presence {
         background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(192, 132, 252, 0.5) 35%, rgba(244, 114, 182, 0.2) 60%, transparent 75%);
-        width: 104px;
+        width: 66px;
       }
       .pet-stage[data-character="alloy"] .pet-presence {
         background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(245, 158, 11, 0.55) 35%, rgba(251, 191, 36, 0.2) 60%, transparent 75%);
-        width: 90px;
+        width: 56px;
       }
       .pet-stage[data-character="doublestuffiana"] .pet-presence {
         background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(34, 197, 94, 0.5) 35%, rgba(16, 185, 129, 0.2) 60%, transparent 75%);
-        width: 140px;
-        height: 22px;
+        width: 90px;
+        height: 15px;
       }
 
       .pet-stage[data-character="nebula"] .pet-bubble {
@@ -92,18 +92,18 @@
       /* Compact Speech Bubble positioned right above actor */
       .pet-bubble {
         position: absolute;
-        bottom: 222px;
-        left: 10px;
-        right: 10px;
-        max-width: 220px;
+        bottom: 184px;
+        left: 6px;
+        right: 6px;
+        max-width: 148px;
         margin: 0 auto;
         background: var(--bg-glass);
         border: 1px solid var(--border-glass);
-        border-radius: 10px;
-        padding: 7px 11px;
+        border-radius: 9px;
+        padding: 5px 8px;
         color: #f1f5f9;
-        font-size: 11.5px;
-        line-height: 1.35;
+        font-size: 10px;
+        line-height: 1.3;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 12px rgba(56, 189, 248, 0.25);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
@@ -112,7 +112,7 @@
         transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         pointer-events: none;
         z-index: 20;
-        max-height: 86px;
+        max-height: 62px;
         overflow: hidden;
       }
 
@@ -134,7 +134,7 @@
       }
 
       .pet-bubble-speaker {
-        font-size: 8px;
+        font-size: 7.5px;
         font-weight: 700;
         letter-spacing: 0.08em;
         color: var(--cyan);
@@ -153,8 +153,8 @@
       /* Compact Full Body Actor Box (2:3 Aspect Ratio matching 1024x1536) */
       .pet-actor-box {
         position: relative;
-        width: 210px;
-        height: 315px;
+        width: 120px;
+        height: 180px;
         display: flex;
         align-items: flex-end;
         justify-content: center;
@@ -188,51 +188,72 @@
         transition: opacity 0.12s ease;
       }
 
-      /* Idle Animation: 2-Frame Cycle with Gentle Breathing */
+      /* Idle Animation: Gentle Organic Breathing + Dynamic Variable Blinking */
       .pet-actor-box[data-mode="idle"] .frame-idle-a {
         opacity: 1;
-        animation: pet-idle-frame-a 2.8s steps(1, end) infinite, pet-breathe 3.4s ease-in-out infinite alternate;
+        animation: pet-breathe 3.6s ease-in-out infinite alternate;
       }
       .pet-actor-box[data-mode="idle"] .frame-idle-b {
         opacity: 0;
-        animation: pet-idle-frame-b 2.8s steps(1, end) infinite, pet-breathe 3.4s ease-in-out infinite alternate;
+        animation: pet-breathe 3.6s ease-in-out infinite alternate;
+      }
+
+      /* Variable Natural Blinking: JS toggles data-blinking on pet-actor-box */
+      .pet-actor-box[data-mode="idle"][data-blinking="true"] .frame-idle-a {
+        opacity: 0 !important;
+      }
+      .pet-actor-box[data-mode="idle"][data-blinking="true"] .frame-idle-b {
+        opacity: 1 !important;
+      }
+
+      /* Subtle Organic Fidget & Weight Shifts during long idle */
+      .pet-actor-box.fidgeting {
+        animation: pet-micro-fidget 0.6s ease-in-out !important;
+      }
+
+      @keyframes pet-micro-fidget {
+        0% { transform: translateY(0) rotate(0deg); }
+        35% { transform: translateY(-1px) rotate(-0.75deg) scaleX(1.005); }
+        70% { transform: translateY(0.5px) rotate(0.4deg); }
+        100% { transform: translateY(0) rotate(0deg); }
       }
 
       /* Complete / Cheer Animation: 2-Frame Cycle */
       .pet-actor-box[data-mode="complete"] .frame-complete-a,
       .pet-actor-box[data-mode="cheer"] .frame-cheer-a {
         opacity: 1;
-        animation: pet-idle-frame-a 1.2s steps(1, end) infinite;
+        animation: pet-cheer-step-a 0.42s step-end infinite;
       }
       .pet-actor-box[data-mode="complete"] .frame-complete-b,
       .pet-actor-box[data-mode="cheer"] .frame-cheer-b {
         opacity: 0;
-        animation: pet-idle-frame-b 1.2s steps(1, end) infinite;
+        animation: pet-cheer-step-b 0.42s step-end infinite;
       }
 
       /* Error / Shock Animation: 2-Frame Cycle */
       .pet-actor-box[data-mode="error"] .frame-error-a {
         opacity: 1;
-        animation: pet-idle-frame-a 0.8s steps(1, end) infinite;
+        animation: pet-error-step-a 0.8s step-end infinite;
       }
       .pet-actor-box[data-mode="error"] .frame-error-b {
         opacity: 0;
-        animation: pet-idle-frame-b 0.8s steps(1, end) infinite;
+        animation: pet-error-step-b 0.8s step-end infinite;
       }
 
-      @keyframes pet-idle-frame-a {
-        0%, 82%, 100% { opacity: 1; }
-        83%, 99% { opacity: 0; }
+      @keyframes pet-error-step-a {
+        0%, 50%, 100% { opacity: 1; }
+        51%, 99% { opacity: 0; }
       }
-      @keyframes pet-idle-frame-b {
-        0%, 82%, 100% { opacity: 0; }
-        83%, 99% { opacity: 1; }
+      @keyframes pet-error-step-b {
+        0%, 50%, 100% { opacity: 0; }
+        51%, 99% { opacity: 1; }
       }
 
       @keyframes pet-breathe {
-        0% { transform: translateY(0) scaleY(1); }
-        50% { transform: translateY(-2px) scaleY(1.01) scaleX(0.995); }
-        100% { transform: translateY(0) scaleY(1); }
+        0% { transform: translateY(0) scaleY(1) scaleX(1); }
+        40% { transform: translateY(-1.5px) scaleY(1.012) scaleX(0.994); }
+        75% { transform: translateY(-0.8px) scaleY(1.006) scaleX(0.997); }
+        100% { transform: translateY(0) scaleY(1) scaleX(1); }
       }
 
       /* Character Identity Auras & Indicators */
@@ -351,26 +372,27 @@
         75%, 100% { opacity: 1; }
       }
 
-      /* Pose Modes: Coffee Sipping (4-Frame Cycle across deck chair & standing mugs) */
+      /* Pose Modes: Coffee Sipping (Realistic Timing: 5.2s rest/hold, 2.8s sip) */
       .pet-actor-box[data-mode="coffee"] .frame-coffee-a,
       .pet-actor-box[data-routine="morning_coffee"][data-mode="idle"] .frame-coffee-a {
         opacity: 1 !important;
-        animation: pet-step-4-a 3.2s step-end infinite, pet-coffee-sip 3.2s ease-in-out infinite alternate !important;
+        animation: pet-coffee-hold 8.0s step-end infinite, pet-coffee-breathe 4.0s ease-in-out infinite alternate !important;
       }
       .pet-actor-box[data-mode="coffee"] .frame-coffee-b,
       .pet-actor-box[data-routine="morning_coffee"][data-mode="idle"] .frame-coffee-b {
         opacity: 0 !important;
-        animation: pet-step-4-c 3.2s step-end infinite, pet-coffee-sip 3.2s ease-in-out infinite alternate !important;
+        animation: pet-coffee-sip-frame 8.0s step-end infinite, pet-coffee-breathe 4.0s ease-in-out infinite alternate !important;
       }
-      .pet-actor-box[data-mode="coffee"] .frame-coffee-c,
-      .pet-actor-box[data-routine="morning_coffee"][data-mode="idle"] .frame-coffee-c {
-        opacity: 0 !important;
-        animation: pet-step-4-b 3.2s step-end infinite, pet-coffee-sip 3.2s ease-in-out infinite alternate !important;
+
+      @keyframes pet-coffee-hold {
+        0%, 64.99% { opacity: 1; }
+        65%, 99.99% { opacity: 0; }
+        100% { opacity: 1; }
       }
-      .pet-actor-box[data-mode="coffee"] .frame-coffee-d,
-      .pet-actor-box[data-routine="morning_coffee"][data-mode="idle"] .frame-coffee-d {
-        opacity: 0 !important;
-        animation: pet-step-4-d 3.2s step-end infinite, pet-coffee-sip 3.2s ease-in-out infinite alternate !important;
+      @keyframes pet-coffee-sip-frame {
+        0%, 64.99% { opacity: 0; }
+        65%, 99.99% { opacity: 1; }
+        100% { opacity: 0; }
       }
 
       .pet-actor-box[data-routine="morning_coffee"][data-mode="idle"] .frame-idle-a,
@@ -380,11 +402,11 @@
       }
 
       .pet-actor-box[data-mode="coffee"] {
-        animation: pet-coffee-sip 2.6s ease-in-out infinite alternate;
+        animation: pet-coffee-breathe 4.0s ease-in-out infinite alternate;
       }
-      @keyframes pet-coffee-sip {
+      @keyframes pet-coffee-breathe {
         0% { transform: translateY(0); }
-        50% { transform: translateY(-2px) scaleY(1.01); }
+        50% { transform: translateY(-1.5px) scaleY(1.008); }
         100% { transform: translateY(0); }
       }
 
@@ -467,25 +489,27 @@
         100% { transform: translateY(-3px); }
       }
 
-      /* Sitting & Perching Pose (2-Frame Relaxed Posture Shift) */
+      /* Sitting & Perching Pose (2-Frame Relaxed Posture Shift: 5.0s lounge, 2.0s settle) */
       .pet-actor-box[data-mode="sit"] .frame-sit-a {
         opacity: 1;
-        animation: pet-sit-step-a 3.2s step-end infinite;
+        animation: pet-sit-step-a 7.0s step-end infinite;
       }
       .pet-actor-box[data-mode="sit"] .frame-sit-b {
         opacity: 0;
-        animation: pet-sit-step-b 3.2s step-end infinite;
+        animation: pet-sit-step-b 7.0s step-end infinite;
       }
       @keyframes pet-sit-step-a {
-        0%, 65%, 100% { opacity: 1; }
-        66%, 99% { opacity: 0; }
+        0%, 71.99% { opacity: 1; }
+        72%, 99.99% { opacity: 0; }
+        100% { opacity: 1; }
       }
       @keyframes pet-sit-step-b {
-        0%, 65%, 100% { opacity: 0; }
-        66%, 99% { opacity: 1; }
+        0%, 71.99% { opacity: 0; }
+        72%, 99.99% { opacity: 1; }
+        100% { opacity: 0; }
       }
       .pet-actor-box[data-mode="sit"] {
-        animation: pet-sit-breathe 3.2s ease-in-out infinite alternate;
+        animation: pet-sit-breathe 3.5s ease-in-out infinite alternate;
       }
       @keyframes pet-sit-breathe {
         0% { transform: translateY(0); }
@@ -496,19 +520,21 @@
       /* Handheld Gaming Pose on Beanbag (2-Frame Cycle: playing console / smiling cozy win) */
       .pet-actor-box[data-mode="game"] .frame-game-a {
         opacity: 1;
-        animation: pet-game-step-a 2.8s step-end infinite;
+        animation: pet-game-step-a 3.6s step-end infinite;
       }
       .pet-actor-box[data-mode="game"] .frame-game-b {
         opacity: 0;
-        animation: pet-game-step-b 2.8s step-end infinite;
+        animation: pet-game-step-b 3.6s step-end infinite;
       }
       @keyframes pet-game-step-a {
-        0%, 60%, 100% { opacity: 1; }
-        61%, 99% { opacity: 0; }
+        0%, 68.99% { opacity: 1; }
+        69%, 99.99% { opacity: 0; }
+        100% { opacity: 1; }
       }
       @keyframes pet-game-step-b {
-        0%, 60%, 100% { opacity: 0; }
-        61%, 99% { opacity: 1; }
+        0%, 68.99% { opacity: 0; }
+        69%, 99.99% { opacity: 1; }
+        100% { opacity: 0; }
       }
       .pet-actor-box[data-mode="game"] {
         animation: pet-game-breathe 2.8s ease-in-out infinite alternate;
@@ -672,8 +698,8 @@
         position: fixed;
         background: var(--bg-glass);
         border: 1px solid var(--border-glass);
-        border-radius: 10px;
-        padding: 6px;
+        border-radius: 9px;
+        padding: 5px;
         box-shadow: 0 12px 28px rgba(0, 0, 0, 0.85), 0 0 14px rgba(56, 189, 248, 0.25);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
@@ -681,9 +707,11 @@
         flex-direction: column;
         gap: 2px;
         z-index: 100;
-        width: 196px;
-        max-width: calc(100vw - 12px);
-        max-height: calc(100vh - 16px);
+        width: 150px;
+        left: 5px;
+        right: 5px;
+        max-width: calc(100vw - 10px);
+        max-height: calc(100vh - 12px);
         overflow-y: auto;
         overflow-x: hidden;
         overscroll-behavior: contain;
@@ -692,15 +720,15 @@
       }
 
       .pet-menu::-webkit-scrollbar {
-        width: 4px;
+        width: 3px;
       }
       .pet-menu::-webkit-scrollbar-track {
         background: rgba(15, 23, 42, 0.5);
-        border-radius: 4px;
+        border-radius: 3px;
       }
       .pet-menu::-webkit-scrollbar-thumb {
         background: rgba(56, 189, 248, 0.5);
-        border-radius: 4px;
+        border-radius: 3px;
       }
       .pet-menu::-webkit-scrollbar-thumb:hover {
         background: rgba(56, 189, 248, 0.85);
@@ -711,11 +739,11 @@
       }
 
       .pet-menu-header {
-        font-size: 8px;
+        font-size: 7.5px;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         color: var(--cyan);
-        padding: 3px 6px 1px;
+        padding: 2px 4px 1px;
         font-weight: 700;
       }
 
@@ -723,9 +751,9 @@
         background: transparent;
         border: none;
         color: #e2e8f0;
-        font-size: 10.5px;
+        font-size: 9.5px;
         font-family: inherit;
-        padding: 4px 6px;
+        padding: 3px 5px;
         border-radius: 5px;
         text-align: left;
         cursor: pointer;
@@ -749,16 +777,16 @@
       .pet-zone-strip {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 3px;
+        gap: 2px;
         padding: 1px 0;
       }
 
       .pet-zone-btn {
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 5px;
-        padding: 4px 2px;
-        font-size: 9.5px;
+        border-radius: 4px;
+        padding: 3px 2px;
+        font-size: 8.5px;
         font-family: inherit;
         color: #cbd5e1;
         cursor: pointer;
@@ -787,14 +815,14 @@
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 4px;
-        padding: 3.5px 5px;
-        font-size: 9.5px;
+        padding: 3px 4px;
+        font-size: 8.5px;
         font-family: inherit;
         color: #cbd5e1;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 3px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -913,12 +941,10 @@
         <!-- Poses & Actions (Mapped to Complete, Work, and Idle) -->
         <img class="pet-frame frame-coffee-a" src="/assets/beeps-pose-command-deck-coffee-a-v3.png" alt="" draggable="false">
         <img class="pet-frame frame-coffee-b" src="/assets/beeps-pose-command-deck-coffee-b-v3.png" alt="" draggable="false">
-        <img class="pet-frame frame-coffee-c" src="/assets/beeps-pose-coffee.png" alt="" draggable="false">
-        <img class="pet-frame frame-coffee-d" src="/assets/beeps-pose-coffee-alt.png" alt="" draggable="false">
-        <img class="pet-frame frame-thinking-a" src="/assets/beeps-state-thinking.png" alt="" draggable="false">
+        <img class="pet-frame frame-thinking-a" src="/assets/beeps-pose-command-deck-console-a-v3.png" alt="" draggable="false">
         <img class="pet-frame frame-thinking-b" src="/assets/beeps-pose-command-deck-console-b-v3.png" alt="" draggable="false">
         <img class="pet-frame frame-cheer-a" src="/assets/beeps-state-success.png" alt="" draggable="false">
-        <img class="pet-frame frame-cheer-b" src="/assets/beeps-pose-beanbag-play-v2.png" alt="" draggable="false">
+        <img class="pet-frame frame-cheer-b" src="/assets/beeps-state-idle.png" alt="" draggable="false">
         <img class="pet-frame frame-dangle-a" src="/assets/beeps-walk-left-b-v2.png" alt="" draggable="false">
         <img class="pet-frame frame-dangle-b" src="/assets/beeps-walk-right-b-v2.png" alt="" draggable="false">
         <img class="pet-frame frame-wave-a" src="/assets/beeps-state-success.png" alt="" draggable="false">
@@ -929,8 +955,8 @@
         <img class="pet-frame frame-game-b" src="/assets/beeps-pose-beanbag-play-b-v3.png" alt="" draggable="false">
         <img class="pet-frame frame-sleep-a" src="/assets/beeps-pose-beanbag-idle-a-v2.png" alt="" draggable="false">
         <img class="pet-frame frame-sleep-b" src="/assets/beeps-pose-beanbag-idle-b-v2.png" alt="" draggable="false">
-        <img class="pet-frame frame-work-a" src="/assets/beeps-pose-command-deck-work-b-a-v1.png" alt="" draggable="false">
-        <img class="pet-frame frame-work-b" src="/assets/beeps-pose-command-deck-work-b-b-v1.png" alt="" draggable="false">
+        <img class="pet-frame frame-work-a" src="/assets/beeps-pose-memory-terminal-a-v3.png" alt="" draggable="false">
+        <img class="pet-frame frame-work-b" src="/assets/beeps-pose-memory-terminal-b-v3.png" alt="" draggable="false">
 
         <!-- Complete & Error Cycles -->
         <img class="pet-frame frame-complete-a" src="/assets/beeps-state-success.png" alt="" draggable="false">
@@ -1500,12 +1526,10 @@
           "frame-walk-r-d": "/assets/beeps-walk-right-b-v2.png",
           "frame-coffee-a": "/assets/beeps-pose-command-deck-coffee-a-v3.png",
           "frame-coffee-b": "/assets/beeps-pose-command-deck-coffee-b-v3.png",
-          "frame-coffee-c": "/assets/beeps-pose-coffee.png",
-          "frame-coffee-d": "/assets/beeps-pose-coffee-alt.png",
-          "frame-thinking-a": "/assets/beeps-state-thinking.png",
+          "frame-thinking-a": "/assets/beeps-pose-command-deck-console-a-v3.png",
           "frame-thinking-b": "/assets/beeps-pose-command-deck-console-b-v3.png",
           "frame-cheer-a": "/assets/beeps-state-success.png",
-          "frame-cheer-b": "/assets/beeps-pose-beanbag-play-v2.png",
+          "frame-cheer-b": "/assets/beeps-state-idle.png",
           "frame-dangle-a": "/assets/beeps-walk-left-b-v2.png",
           "frame-dangle-b": "/assets/beeps-walk-right-b-v2.png",
           "frame-wave-a": "/assets/beeps-state-success.png",
@@ -1516,8 +1540,8 @@
           "frame-game-b": "/assets/beeps-pose-beanbag-play-b-v3.png",
           "frame-sleep-a": "/assets/beeps-pose-beanbag-idle-a-v2.png",
           "frame-sleep-b": "/assets/beeps-pose-beanbag-idle-b-v2.png",
-          "frame-work-a": "/assets/beeps-pose-command-deck-work-b-a-v1.png",
-          "frame-work-b": "/assets/beeps-pose-command-deck-work-b-b-v1.png",
+          "frame-work-a": "/assets/beeps-pose-memory-terminal-a-v3.png",
+          "frame-work-b": "/assets/beeps-pose-memory-terminal-b-v3.png",
           "frame-complete-a": "/assets/beeps-state-success.png",
           "frame-complete-b": "/assets/beeps-pose-command-deck-coffee-a-v3.png",
           "frame-error-a": "/assets/beeps-state-error.png",
@@ -1664,9 +1688,9 @@
             id: "console_terminal",
             name: "Console Work Station",
             short: "Console",
-            spriteA: "/assets/beeps-pose-command-deck-work-b-a-v1.png",
-            spriteB: "/assets/beeps-pose-command-deck-work-b-b-v1.png",
-            voiceLine: "Command terminal keyed up and monitoring telemetry."
+            spriteA: "/assets/beeps-pose-memory-terminal-a-v3.png",
+            spriteB: "/assets/beeps-pose-memory-terminal-b-v3.png",
+            voiceLine: "Memory terminal online and monitoring telemetry."
           }
         };
 
@@ -1788,7 +1812,7 @@
           } else if (activeRoutineState === "beanbag_home") {
             if (nameEl) nameEl.textContent = "Auto: Beanbag";
             if (frameIdleA) frameIdleA.src = "/assets/beeps-pose-beanbag-idle-a-v2.png";
-            if (frameIdleB) frameIdleB.src = "/assets/beeps-pose-beanbag-play-v2.png";
+            if (frameIdleB) frameIdleB.src = "/assets/beeps-pose-beanbag-idle-b-v2.png";
             if (announce) say("Welcome home! Kicked back on the beanbag deck. 👾", 2500);
           } else if (activeRoutineState === "observatory_bed") {
             if (nameEl) nameEl.textContent = "Auto: Observatory";
@@ -2421,6 +2445,74 @@
         fetchDailyBriefCalendar();
         setInterval(fetchDailyBriefCalendar, 45000);
         setInterval(evaluateScheduleRoutine, 15000);
+
+        // ==========================================
+        // Natural Variable Blinking & Vitality Engine
+        // ==========================================
+        let blinkTimeout = null;
+        function scheduleNextBlink() {
+          if (blinkTimeout) clearTimeout(blinkTimeout);
+          // Variable natural timing between blinks: random 2.4s to 6.8s
+          const nextInterval = Math.floor(Math.random() * 4400) + 2400;
+          blinkTimeout = setTimeout(performBlink, nextInterval);
+        }
+
+        function performBlink() {
+          const actorBox = document.getElementById("pet-actor");
+          // Only blink when in idle mode, not dragging, and not in sleep mode
+          if (!actorBox || actorBox.dataset.mode !== "idle" || actorBox.dataset.dragging === "true") {
+            scheduleNextBlink();
+            return;
+          }
+
+          // ~28% chance of a double blink, otherwise single blink
+          const isDoubleBlink = Math.random() < 0.28;
+          const blinkDuration = Math.floor(Math.random() * 30) + 115; // 115ms - 145ms realistic blink
+
+          actorBox.setAttribute("data-blinking", "true");
+
+          setTimeout(() => {
+            actorBox.removeAttribute("data-blinking");
+
+            if (isDoubleBlink) {
+              const pauseBetween = Math.floor(Math.random() * 30) + 110; // 110ms - 140ms
+              setTimeout(() => {
+                actorBox.setAttribute("data-blinking", "true");
+                setTimeout(() => {
+                  actorBox.removeAttribute("data-blinking");
+                  scheduleNextBlink();
+                }, blinkDuration);
+              }, pauseBetween);
+            } else {
+              scheduleNextBlink();
+            }
+          }, blinkDuration);
+        }
+
+        scheduleNextBlink();
+
+        // Subtle organic micro-fidgets & weight shifts during long idle
+        let fidgetTimeout = null;
+        function scheduleNextFidget() {
+          if (fidgetTimeout) clearTimeout(fidgetTimeout);
+          const nextInterval = Math.floor(Math.random() * 12000) + 14000; // 14s - 26s
+          fidgetTimeout = setTimeout(performFidget, nextInterval);
+        }
+
+        function performFidget() {
+          const actorBox = document.getElementById("pet-actor");
+          if (actorBox && actorBox.dataset.mode === "idle" && actorBox.dataset.dragging !== "true") {
+            actorBox.classList.add("fidgeting");
+            setTimeout(() => {
+              actorBox.classList.remove("fidgeting");
+              scheduleNextFidget();
+            }, 600);
+          } else {
+            scheduleNextFidget();
+          }
+        }
+
+        scheduleNextFidget();
 
         // Initial welcome speech on launch (silent bubble by default)
         setTimeout(() => {

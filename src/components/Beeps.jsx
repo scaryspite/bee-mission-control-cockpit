@@ -836,11 +836,35 @@ export default function Beeps({
                       submitCommand(event);
                     }
                   }}
-                  placeholder="Ask about a project, source, or next step (Shift+Enter for newline)"
+                  onPaste={(event) => {
+                    const items = Array.from(event.clipboardData?.items || []);
+                    const imageFiles = items
+                      .filter((item) => item.type.startsWith("image/"))
+                      .map((item) => {
+                        const file = item.getAsFile();
+                        if (!file) return null;
+                        const ext = item.type.split("/")[1] || "png";
+                        const name = (file.name && file.name !== "image.png") ? file.name : `screenshot_${Date.now()}.${ext}`;
+                        return new File([file], name, { type: item.type });
+                      })
+                      .filter(Boolean);
+                    if (imageFiles.length > 0) {
+                      setAttachments((current) => [...current, ...imageFiles]);
+                    }
+                  }}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const files = Array.from(event.dataTransfer?.files || []);
+                    if (files.length > 0) {
+                      setAttachments((current) => [...current, ...files]);
+                    }
+                  }}
+                  placeholder="Ask about a project, source, or next step (Shift+Enter for newline, Cmd+V to paste screens)"
                   autoFocus
                   disabled={commandPending}
                 />
-                <button type="submit" disabled={commandPending || !command.trim()}>Send</button>
+                <button type="submit" disabled={commandPending || (!command.trim() && attachments.length === 0)}>Send</button>
               </div>
               {attachments.length > 0 && <div className="beeps-attachment-tray" aria-live="polite">
                 {attachments.map((file) => <span className="beeps-attachment-chip" key={`${file.name}-${file.size}`}>
