@@ -46,8 +46,8 @@
       .pet-presence {
         position: absolute;
         bottom: 3px;
-        width: 66px;
-        height: 12px;
+        width: 48px;
+        height: 9px;
         border-radius: 50%;
         background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(56, 189, 248, 0.4) 35%, rgba(244, 114, 182, 0.12) 60%, transparent 75%);
         filter: blur(2px);
@@ -59,16 +59,16 @@
       /* Character-Specific Floor Glows & Bubble Themes */
       .pet-stage[data-character="nebula"] .pet-presence {
         background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(192, 132, 252, 0.5) 35%, rgba(244, 114, 182, 0.2) 60%, transparent 75%);
-        width: 66px;
+        width: 48px;
       }
       .pet-stage[data-character="alloy"] .pet-presence {
         background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(245, 158, 11, 0.55) 35%, rgba(251, 191, 36, 0.2) 60%, transparent 75%);
-        width: 56px;
+        width: 42px;
       }
       .pet-stage[data-character="doublestuffiana"] .pet-presence {
         background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.7) 0%, rgba(34, 197, 94, 0.5) 35%, rgba(16, 185, 129, 0.2) 60%, transparent 75%);
-        width: 90px;
-        height: 15px;
+        width: 64px;
+        height: 11px;
       }
 
       .pet-stage[data-character="nebula"] .pet-bubble {
@@ -92,18 +92,18 @@
       /* Compact Speech Bubble positioned right above actor */
       .pet-bubble {
         position: absolute;
-        bottom: 184px;
+        bottom: 122px;
         left: 6px;
         right: 6px;
-        max-width: 148px;
+        max-width: 136px;
         margin: 0 auto;
         background: var(--bg-glass);
         border: 1px solid var(--border-glass);
-        border-radius: 9px;
-        padding: 5px 8px;
+        border-radius: 8px;
+        padding: 4px 7px;
         color: #f1f5f9;
-        font-size: 10px;
-        line-height: 1.3;
+        font-size: 9.5px;
+        line-height: 1.25;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 12px rgba(56, 189, 248, 0.25);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
@@ -112,7 +112,7 @@
         transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         pointer-events: none;
         z-index: 20;
-        max-height: 62px;
+        max-height: 58px;
         overflow: hidden;
       }
 
@@ -150,11 +150,11 @@
         overflow: hidden;
       }
 
-      /* Compact Full Body Actor Box (2:3 Aspect Ratio matching 1024x1536) */
+      /* Compact Full Body Actor Box (2:3 Aspect Ratio matching 1024x1536, ~1/3 size) */
       .pet-actor-box {
         position: relative;
-        width: 120px;
-        height: 180px;
+        width: 76px;
+        height: 114px;
         display: flex;
         align-items: flex-end;
         justify-content: center;
@@ -372,27 +372,27 @@
         75%, 100% { opacity: 1; }
       }
 
-      /* Pose Modes: Coffee Sipping (Realistic Timing: 5.2s rest/hold, 2.8s sip) */
+      /* Pose Modes: Coffee Sipping (Realistic Timing: 9.6s rest/hold, 2.2s sip) */
       .pet-actor-box[data-mode="coffee"] .frame-coffee-a,
       .pet-actor-box[data-routine="morning_coffee"][data-mode="idle"] .frame-coffee-a {
         opacity: 1 !important;
-        animation: pet-coffee-hold 8.0s step-end infinite, pet-coffee-breathe 4.0s ease-in-out infinite alternate !important;
+        animation: pet-coffee-hold 12.0s step-end infinite, pet-coffee-breathe 4.0s ease-in-out infinite alternate !important;
       }
       .pet-actor-box[data-mode="coffee"] .frame-coffee-b,
       .pet-actor-box[data-routine="morning_coffee"][data-mode="idle"] .frame-coffee-b {
         opacity: 0 !important;
-        animation: pet-coffee-sip-frame 8.0s step-end infinite, pet-coffee-breathe 4.0s ease-in-out infinite alternate !important;
+        animation: pet-coffee-sip-frame 12.0s step-end infinite, pet-coffee-breathe 4.0s ease-in-out infinite alternate !important;
       }
 
       @keyframes pet-coffee-hold {
-        0%, 64.99% { opacity: 1; }
-        65%, 99.99% { opacity: 0; }
-        100% { opacity: 1; }
+        0%, 81.99% { opacity: 1; }
+        82%, 97.99% { opacity: 0; }
+        98%, 100% { opacity: 1; }
       }
       @keyframes pet-coffee-sip-frame {
-        0%, 64.99% { opacity: 0; }
-        65%, 99.99% { opacity: 1; }
-        100% { opacity: 0; }
+        0%, 81.99% { opacity: 0; }
+        82%, 97.99% { opacity: 1; }
+        98%, 100% { opacity: 0; }
       }
 
       .pet-actor-box[data-routine="morning_coffee"][data-mode="idle"] .frame-idle-a,
@@ -489,27 +489,27 @@
         100% { transform: translateY(-3px); }
       }
 
-      /* Sitting & Perching Pose (2-Frame Relaxed Posture Shift: 5.0s lounge, 2.0s settle) */
+      /* Sitting & Perching Pose (2-Frame Relaxed Posture Shift: 9.0s lounge, 3.0s settle) */
       .pet-actor-box[data-mode="sit"] .frame-sit-a {
         opacity: 1;
-        animation: pet-sit-step-a 7.0s step-end infinite;
+        animation: pet-sit-step-a 12.0s step-end infinite;
       }
       .pet-actor-box[data-mode="sit"] .frame-sit-b {
         opacity: 0;
-        animation: pet-sit-step-b 7.0s step-end infinite;
+        animation: pet-sit-step-b 12.0s step-end infinite;
       }
       @keyframes pet-sit-step-a {
-        0%, 71.99% { opacity: 1; }
-        72%, 99.99% { opacity: 0; }
+        0%, 74.99% { opacity: 1; }
+        75%, 99.99% { opacity: 0; }
         100% { opacity: 1; }
       }
       @keyframes pet-sit-step-b {
-        0%, 71.99% { opacity: 0; }
-        72%, 99.99% { opacity: 1; }
+        0%, 74.99% { opacity: 0; }
+        75%, 99.99% { opacity: 1; }
         100% { opacity: 0; }
       }
       .pet-actor-box[data-mode="sit"] {
-        animation: pet-sit-breathe 3.5s ease-in-out infinite alternate;
+        animation: pet-sit-breathe 4.2s ease-in-out infinite alternate;
       }
       @keyframes pet-sit-breathe {
         0% { transform: translateY(0); }
@@ -520,24 +520,24 @@
       /* Handheld Gaming Pose on Beanbag (2-Frame Cycle: playing console / smiling cozy win) */
       .pet-actor-box[data-mode="game"] .frame-game-a {
         opacity: 1;
-        animation: pet-game-step-a 3.6s step-end infinite;
+        animation: pet-game-step-a 5.6s step-end infinite;
       }
       .pet-actor-box[data-mode="game"] .frame-game-b {
         opacity: 0;
-        animation: pet-game-step-b 3.6s step-end infinite;
+        animation: pet-game-step-b 5.6s step-end infinite;
       }
       @keyframes pet-game-step-a {
-        0%, 68.99% { opacity: 1; }
-        69%, 99.99% { opacity: 0; }
+        0%, 79.99% { opacity: 1; }
+        80%, 99.99% { opacity: 0; }
         100% { opacity: 1; }
       }
       @keyframes pet-game-step-b {
-        0%, 68.99% { opacity: 0; }
-        69%, 99.99% { opacity: 1; }
+        0%, 79.99% { opacity: 0; }
+        80%, 99.99% { opacity: 1; }
         100% { opacity: 0; }
       }
       .pet-actor-box[data-mode="game"] {
-        animation: pet-game-breathe 2.8s ease-in-out infinite alternate;
+        animation: pet-game-breathe 3.4s ease-in-out infinite alternate;
       }
       @keyframes pet-game-breathe {
         0% { transform: translateY(0); }
@@ -545,30 +545,31 @@
         100% { transform: translateY(0); }
       }
 
-
-      /* Peaceful Sleep & Nap Pose (2-Frame Breathing Cycle + Floating Cyber Zzz) */
+      /* Peaceful Sleep & Nap Pose (Calm Breathing Lounge, no rapid flickering) */
       .pet-actor-box[data-mode="sleep"] .frame-sleep-a {
         opacity: 1;
-        animation: pet-sleep-step-a 2.8s step-end infinite;
+        animation: pet-sleep-step-a 16.0s step-end infinite;
       }
       .pet-actor-box[data-mode="sleep"] .frame-sleep-b {
         opacity: 0;
-        animation: pet-sleep-step-b 2.8s step-end infinite;
+        animation: pet-sleep-step-b 16.0s step-end infinite;
       }
       @keyframes pet-sleep-step-a {
-        0%, 50%, 100% { opacity: 1; }
-        51%, 99% { opacity: 0; }
+        0%, 89.99% { opacity: 1; }
+        90%, 99.99% { opacity: 0; }
+        100% { opacity: 1; }
       }
       @keyframes pet-sleep-step-b {
-        0%, 50%, 100% { opacity: 0; }
-        51%, 99% { opacity: 1; }
+        0%, 89.99% { opacity: 0; }
+        90%, 99.99% { opacity: 1; }
+        100% { opacity: 0; }
       }
       .pet-actor-box[data-mode="sleep"] {
-        animation: pet-sleep-pulse 2.8s ease-in-out infinite alternate;
+        animation: pet-sleep-pulse 3.8s ease-in-out infinite alternate;
       }
       @keyframes pet-sleep-pulse {
         0% { transform: scale(1); }
-        50% { transform: scale(1.012) translateY(-1.5px); }
+        50% { transform: scale(1.01) translateY(-1px); }
         100% { transform: scale(1); }
       }
 
@@ -2452,41 +2453,42 @@
         let blinkTimeout = null;
         function scheduleNextBlink() {
           if (blinkTimeout) clearTimeout(blinkTimeout);
-          // Variable natural timing between blinks: random 2.4s to 6.8s
-          const nextInterval = Math.floor(Math.random() * 4400) + 2400;
+          // Variable natural timing between blinks: random 2.6s to 7.2s with organic jitter
+          const nextInterval = Math.floor(Math.random() * 4600) + 2600;
           blinkTimeout = setTimeout(performBlink, nextInterval);
         }
 
         function performBlink() {
           const actorBox = document.getElementById("pet-actor");
-          // Only blink when in idle mode, not dragging, and not in sleep mode
-          if (!actorBox || actorBox.dataset.mode !== "idle" || actorBox.dataset.dragging === "true") {
+          // Only blink when not dragging and not in peaceful sleep
+          if (!actorBox || actorBox.dataset.dragging === "true" || actorBox.dataset.mode === "sleep") {
             scheduleNextBlink();
             return;
           }
 
-          // ~28% chance of a double blink, otherwise single blink
-          const isDoubleBlink = Math.random() < 0.28;
-          const blinkDuration = Math.floor(Math.random() * 30) + 115; // 115ms - 145ms realistic blink
+          // Dynamic multi-blink distribution:
+          // ~65% single blink, ~25% double blink, ~10% triple flutter blink
+          const roll = Math.random();
+          const blinkCount = roll < 0.65 ? 1 : (roll < 0.90 ? 2 : 3);
 
-          actorBox.setAttribute("data-blinking", "true");
+          function executeBlinkCycle(remaining) {
+            const blinkDuration = Math.floor(Math.random() * 35) + 105; // 105ms - 140ms natural eyelid closure
+            actorBox.setAttribute("data-blinking", "true");
 
-          setTimeout(() => {
-            actorBox.removeAttribute("data-blinking");
-
-            if (isDoubleBlink) {
-              const pauseBetween = Math.floor(Math.random() * 30) + 110; // 110ms - 140ms
-              setTimeout(() => {
-                actorBox.setAttribute("data-blinking", "true");
+            setTimeout(() => {
+              actorBox.removeAttribute("data-blinking");
+              if (remaining > 1) {
+                const pauseBetween = Math.floor(Math.random() * 60) + 95; // 95ms - 155ms pause between blinks
                 setTimeout(() => {
-                  actorBox.removeAttribute("data-blinking");
-                  scheduleNextBlink();
-                }, blinkDuration);
-              }, pauseBetween);
-            } else {
-              scheduleNextBlink();
-            }
-          }, blinkDuration);
+                  executeBlinkCycle(remaining - 1);
+                }, pauseBetween);
+              } else {
+                scheduleNextBlink();
+              }
+            }, blinkDuration);
+          }
+
+          executeBlinkCycle(blinkCount);
         }
 
         scheduleNextBlink();
