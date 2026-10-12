@@ -93,17 +93,17 @@
       .pet-bubble {
         position: absolute;
         bottom: 122px;
-        left: 6px;
-        right: 6px;
-        max-width: 136px;
+        left: 4px;
+        right: 4px;
+        max-width: 152px;
         margin: 0 auto;
         background: var(--bg-glass);
         border: 1px solid var(--border-glass);
         border-radius: 8px;
-        padding: 4px 7px;
+        padding: 4px 6px;
         color: #f1f5f9;
-        font-size: 9.5px;
-        line-height: 1.25;
+        font-size: 9px;
+        line-height: 1.22;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 12px rgba(56, 189, 248, 0.25);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
@@ -112,8 +112,13 @@
         transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         pointer-events: none;
         z-index: 20;
-        max-height: 58px;
+        max-height: 110px;
         overflow: hidden;
+      }
+
+      .pet-bubble.long-text {
+        font-size: 8.5px;
+        line-height: 1.18;
       }
 
       .pet-bubble.visible {
@@ -145,7 +150,7 @@
       .pet-bubble-text {
         word-break: break-word;
         display: -webkit-box;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 6;
         -webkit-box-orient: vertical;
         overflow: hidden;
       }
@@ -1209,7 +1214,13 @@
         // Show bubble & trigger visual talking (sound only if voiceEnabled)
         function say(text, duration = 3600) {
           if (!text || (typeof text === "string" && !text.trim())) return;
-          bubbleText.textContent = text;
+          const cleanText = typeof text === "string" ? text.trim().slice(0, 140) : text;
+          bubbleText.textContent = cleanText;
+          if (typeof cleanText === "string" && cleanText.length > 70) {
+            bubble.classList.add("long-text");
+          } else {
+            bubble.classList.remove("long-text");
+          }
           bubble.classList.add("visible");
 
           if (bubbleTimer) clearTimeout(bubbleTimer);
