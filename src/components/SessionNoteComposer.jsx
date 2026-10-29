@@ -83,6 +83,7 @@ export default function SessionNoteComposer({ onDraft, onClose, pending = false 
             <select value={client} onChange={(event) => setClient(event.target.value)} disabled={pending}>
               <option>BeGo</option>
               <option>MiLy</option>
+              <option>SeWi</option>
             </select>
           </label>
           <label>

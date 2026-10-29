@@ -234,16 +234,34 @@ export default function CrewActors() {
 
     const unsubscribe = beepsSDK.observe('crew-dispatch', handleStatusDispatch);
 
-    // Initial ambient demonstrations
-    setTimeout(() => {
-      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'start', task_detail: 'Running deep-space diagnostic scan.' });
-    }, 3000);
-    
-    setTimeout(() => {
-      beepsSDK.dispatch('crew-dispatch', { crew_member: 'alloy', task: 'complete', task_detail: 'Diagnostic scan complete. All systems nominal.' });
-    }, 8000);
+    // Live event stream from Rust Core / Companion telemetry
+    let eventSource = null;
+    if (typeof window !== "undefined" && typeof window.EventSource !== "undefined") {
+      try {
+        eventSource = new EventSource('/api/v1/events');
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data && (data.type === 'crew' || data.type === 'crew_task')) {
+              handleStatusDispatch({
+                crew_member: data.crew_member || data.agent_id,
+                task: data.phase || data.status || 'working',
+                task_detail: data.label || data.detail || ''
+              });
+            }
+          } catch {
+            // Ignore malformed SSE frames
+          }
+        };
+      } catch {
+        // SSE connection failure handled silently
+      }
+    }
 
-    return unsubscribe;
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+      if (eventSource) eventSource.close();
+    };
   }, []);
 
   return (
